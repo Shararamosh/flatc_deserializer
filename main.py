@@ -12,6 +12,7 @@ from tkinter.filedialog import askopenfilename, askopenfilenames, askdirectory
 import i18n
 from PIL.ImageTk import PhotoImage
 from tqdm import tqdm
+from tqdm.contrib.logging import logging_redirect_tqdm
 from flatc_funcs import deserialize  # pylint: disable=import-error
 
 
@@ -40,10 +41,10 @@ root.withdraw()
 root.iconphoto(True, PhotoImage(file=get_resource_path("images/flatbuffers-logo-clean.png")))
 
 
-def main() -> int:
+def main() -> int | str:
     """
     Десериализация бинарных файлов Flatbuffers по заданной схеме.
-    :return: Код ошибки.
+    :return: Код ошибки или строка об ошибке.
     """
     flatc_path = askopenfilename(title=i18n.t("main.tkinter_flatc_select"),
                                  filetypes=[(i18n.t("main.exe_filetype"), "*.exe")])
@@ -59,14 +60,16 @@ def main() -> int:
                                         (i18n.t("main.flatc_binary_filetype"), "*." + schema_name)])
     output_path = askdirectory(title=i18n.t("flatc_funcs.tkinter_output_select"))
     full_size = sum(os.stat(binary_path).st_size for binary_path in binary_paths)
-    pbar = tqdm(total=full_size, position=0, unit="B", unit_scale=True, desc=i18n.t("main.files"))
-    for binary_path in binary_paths:
-        pbar.set_postfix_str(binary_path)
-        pbar.clear()
-        deserialize(flatc_path, schema_path, binary_path, output_path)
-        pbar.update(os.stat(binary_path).st_size)
-    pbar.set_postfix_str("")
-    pbar.close()
+    with logging_redirect_tqdm():
+        pbar = tqdm(total=full_size, position=0, unit="B", unit_scale=True,
+                    desc=i18n.t("main.files"))
+        for binary_path in binary_paths:
+            pbar.set_postfix_str(binary_path)
+            pbar.clear()
+            deserialize(flatc_path, schema_path, binary_path, output_path)
+            pbar.update(os.stat(binary_path).st_size)
+        pbar.set_postfix_str("")
+        pbar.close()
     return os.EX_OK
 
 
