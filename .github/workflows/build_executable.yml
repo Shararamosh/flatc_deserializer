@@ -1,0 +1,27 @@
+name: Build Windows Executable
+on:
+  push:
+    branches:
+      - master
+jobs:
+  build-windows:
+    runs-on: windows-latest
+    steps:
+      - name: Checkout
+        uses: actions/checkout@v4
+      - name: Install Python
+        uses: actions/setup-python@v5
+        with:
+          python-version: "3.11"
+      - name: Install requirements
+        run: pip install pillow tqdm i18nice[YAML] pyinstaller
+      - name: Run PyInstaller
+        run: pyinstaller --onefile --name="flatc_deserializer" --console --icon=images\flatbuffers-logo-clean.png --add-data="images:images" --add-data="localization:localization" main.py
+      - name: Create Automatic Windows Release
+        uses: marvinpinto/action-automatic-releases@latest
+        with:
+          repo_token: ${{ secrets.GITHUB_TOKEN }}
+          automatic_release_tag: latest
+          prerelease: false
+          title: Latest Build
+          files: dist\flatc_deserializer.exe

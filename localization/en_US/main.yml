@@ -1,0 +1,8 @@
+tkinter_flatc_select: Select scheme compiler
+exe_filetype: Windows Executable
+tkinter_fbs_select: Select scheme file
+fbs_filetype: Flatbuffers scheme
+tkinter_binaries_select: Select binary files
+flatc_binary_filetype: Binary Flatbuffers file
+tkinter_output_select: Select output directory
+files: Files

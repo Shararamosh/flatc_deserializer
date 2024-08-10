@@ -1,0 +1,8 @@
+tkinter_flatc_select: Выбор компилятора схемы
+exe_filetype: Приложение Windows
+tkinter_fbs_select: Выбор файла схемы
+fbs_filetype: Схема Flatbuffers
+tkinter_binaries_select: Выбор бинарных файлов
+flatc_binary_filetype: Бинарный файл Flatbuffers
+tkinter_output_select: Выбор директории вывода
+files: Файлы
