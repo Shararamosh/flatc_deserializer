@@ -1,4 +1,4 @@
-name: Build Windows Executable
+name: Build Windows Executables
 permissions: write-all
 on:
   push:
@@ -16,10 +16,15 @@ jobs:
           python-version: "3.11"
       - name: Install requirements
         run: pip install pillow tqdm i18nice[YAML] pyinstaller
-      - name: Run PyInstaller
+      - name: Run PyInstaller for Deserializer
         run: pyinstaller --onefile --name="flatc_deserializer" --console --icon=images\flatbuffers-logo-clean.png --add-data="images:images" --add-data="localization:localization" main.py
-      - name: Copy Executable from dist to root directory
+      - name: Copy Deserializer Executable from dist to root directory
         run: copy dist\flatc_deserializer.exe .
+        shell: cmd
+      - name: Run PyInstaller for Downloader
+        run: pyinstaller --onefile --name="flatc_downloader" --console --icon=images\flatbuffers-downloader-logo-clean.png --add-data="images:images" --add-data="localization:localization" main.py
+      - name: Copy Downloader Executable from dist to root directory
+        run: copy dist\flatc_downloader.exe .
         shell: cmd
       - name: Create Automatic Windows Release
         uses: marvinpinto/action-automatic-releases@latest
@@ -28,4 +33,4 @@ jobs:
           automatic_release_tag: latest
           prerelease: false
           title: Latest Build
-          files: flatc_deserializer.exe
+          files: flatc_deserializer.exe flatc_downloader.exe

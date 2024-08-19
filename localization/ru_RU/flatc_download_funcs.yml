@@ -1,0 +1,5 @@
+download_start: Получение данных о последней версии Flatbuffers...
+download_failed: Не удалось найти валидную последнюю версию Flatbuffers.
+download_finish: "Последняя версия Flatbuffers была загружена в %s."
+unpack_path: Архив %s распакован в %s.
+archive_removed: Архив Flatbuffers был удалён.

@@ -3,8 +3,9 @@
 """
 import os
 from json import loads
-from subprocess import run, CalledProcessError
 from logging import info
+from subprocess import run, CalledProcessError
+
 from i18n import t
 
 

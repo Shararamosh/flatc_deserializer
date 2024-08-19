@@ -6,3 +6,10 @@ tkinter_binaries_select: Select binary files
 flatc_binary_filetype: Binary Flatbuffers file
 tkinter_output_select: Select output directory
 files: Files
+unsupported_platform: "Can't run on unsupported platform: %s."
+executable_not_found: Executable %s not found.
+file_not_found: File %s not found.
+directory_not_found: Directory %s not found.
+file_removed: File %s is removed.
+flatc_already_exists: "Flabuffers schema compiler already exists in working directory: %s."
+file_not_executable: File %s is not executable.
