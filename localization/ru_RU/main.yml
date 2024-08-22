@@ -13,3 +13,14 @@ directory_not_found: Директория %s не найдена.
 file_removed: Файл %s был удалён.
 flatc_already_exists: "Компилятор схемы Flatbuffers уже существует в рабочей директории: %s"
 file_not_executable: Файл %s не является исполняемым.
+tkinter_fbs_directory_select: Выбор директории с файлами схем
+tkinter_binary_directory_select: Выбор директории с бинарными файлами
+no_schema_files_found: Файлы схем не были найдены в директории %s.
+schemas_directory_arg: Директория с файлами схем
+binaries_directory_arg: Директория с бинарными файлами
+output_directory_arg: Директория вывода для десериализованных файлов
+schema_file_arg: Файл схемы
+binary_files_arg: Бинарные файлы
+flatc_path_arg: Путь к компилятору схемы (flatc)
+flatc_deserializer_name: Flatbuffers Batch Deserializer
+flatc_deserializer_desc: Программа для пакетной десериализации бинарных файлов Flatbuffers.

@@ -1,6 +1,6 @@
-tkinter_flatc_select: Select scheme compiler
+tkinter_flatc_select: Select schema compiler
 exe_filetype: Windows Executable
-tkinter_fbs_select: Select scheme file
+tkinter_fbs_select: Select schema file
 fbs_filetype: Flatbuffers scheme
 tkinter_binaries_select: Select binary files
 flatc_binary_filetype: Binary Flatbuffers file
@@ -13,3 +13,14 @@ directory_not_found: Directory %s not found.
 file_removed: File %s is removed.
 flatc_already_exists: "Flabuffers schema compiler already exists in working directory: %s."
 file_not_executable: File %s is not executable.
+tkinter_fbs_directory_select: Select directory with schema files
+tkinter_binary_directory_select: Select directory with binary files
+no_schema_files_found: No schema files found in directory %s.
+schemas_directory_arg: Directory with schema files
+binaries_directory_arg: Directory with binary files
+output_directory_arg: Output directory for deserialized files
+schema_file_arg: Schema file
+binary_files_arg: Binary files
+flatc_path_arg: Path to schema compiler (flatc)
+flatc_deserializer_name: Flatbuffers Batch Deserializer
+flatc_deserializer_desc: Program for batch deserialization of Flatbuffers binary files.

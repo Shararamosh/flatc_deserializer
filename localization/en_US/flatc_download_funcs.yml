@@ -1,5 +1,5 @@
 download_start: Retrieving Flatbuffers latest release data...
 download_failed: Can't find valid latest Flatbuffers release.
-download_finish: "Downloaded latest Flatbuffers release to %s."
+download_finish: Downloaded latest Flatbuffers release to %s.
 unpack_path: Unpacked %s archive to %s.
 archive_removed: Flatbuffers archive is removed.

@@ -20,10 +20,12 @@ jobs:
         run: |
           pyinstaller --onefile --name="flatc_deserializer" --console --icon=images\flatbuffers-logo-clean.png --add-data="images:images" --add-data="localization:localization" flatc_deserializer.py
           pyinstaller --onefile --name="flatc_downloader" --console --icon=images\flatbuffers-downloader-logo-clean.png --add-data="images:images" --add-data="localization:localization" flatc_downloader.py
+          pyinstaller --onefile --name="flatc_deserializer_batch" --console --icon=images\flatbuffers-batch-logo-clean.png --add-data="images:images" --add-data="localization:localization" flatc_deserializer_batch.py
       - name: Move Deserializer and Downloader Executables from dist to root directory and delete dist directory
         run: |
           move dist\flatc_deserializer.exe .
           move dist\flatc_downloader.exe .
+          move dist\flatc_deserializer_batch.exe .
           rd /s /q dist
         shell: cmd
       - name: Create Automatic Windows Release
@@ -36,3 +38,4 @@ jobs:
           files: |
             flatc_deserializer.exe
             flatc_downloader.exe
+            flatc_deserializer_batch.exe

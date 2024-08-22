@@ -37,6 +37,7 @@ def prepare_app(icon_path: str):
     """
     logging.basicConfig(stream=sys.stdout, format="%(message)s", level=logging.INFO)
     filterwarnings("ignore", category=DeprecationWarning)
+    # noinspection PyDeprecation
     i18n.set("locale", getdefaultlocale()[0])  # pylint: disable=deprecated-method
     i18n.set("fallback", "en_US")
     i18n.load_path.append(get_resource_path("localization"))
@@ -49,20 +50,14 @@ def prepare_app(icon_path: str):
     root.iconphoto(True, PhotoImage(file=get_resource_path(icon_path)))
 
 
-def get_flatc_path(allow_system_path: bool, root_path: str, allow_ask: bool,
-                   suppress_ask_error: bool = True) -> str:
+def get_flatc_path(root_path: str, allow_ask: bool, suppress_ask_error: bool = True) -> str:
     """
     Получение пути к файлу компилятора Flatbuffers.
-    :param allow_system_path: Позволить искать файл в системных директориях Python.
     :param root_path: Путь к текущей рабочей директории.
     :param allow_ask: Позволить открыть файл через диалоговое окно, если файла нет в рабочей директории.
     :param suppress_ask_error: Игнорировать ошибку FileNotFoundError, если не выводится диалоговое окно для файла.
     :return: Путь к файлу.
     """
-    if allow_system_path:
-        flatc_path = which("flatc")
-        if flatc_path is not None:
-            return os.path.abspath(flatc_path)
     flatc_path = which("flatc", path=root_path + os.sep)
     if flatc_path is not None:
         return os.path.abspath(flatc_path)
@@ -89,7 +84,7 @@ def execute_download(root_path: str) -> int | str:
     :param root_path: Путь к текущей рабочей директории.
     :return: Код ошибки или строка об ошибке.
     """
-    flatc_path = get_flatc_path(False, root_path, False, True)
+    flatc_path = get_flatc_path(root_path, False, True)
     if flatc_path != "":
         logging.info(i18n.t("main.flatc_already_exists"), flatc_path)
     else:
@@ -97,25 +92,39 @@ def execute_download(root_path: str) -> int | str:
     return os.EX_OK
 
 
-def execute_deserialize(flatc_path: str) -> int | str:
+def execute_deserialize(flatc_path: str, schema_path: str, binary_paths: list[str], output_path:
+str) -> (int | str):
     """
     Десериализация бинарных файлов Flatbuffers по заданной схеме.
     :param flatc_path: Путь к файлу компилятора схемы.
+    :param schema_path: Путь к файлу схемы.
+    :param binary_paths: Список путей к бинарным файлам.
+    :param output_path: Путь к директории вывода для десериализованных файлов.
     :return: Код ошибки или строка об ошибке.
     """
     if not os.path.isfile(flatc_path):
         raise FileNotFoundError(i18n.t("main.file_not_found") % flatc_path)
     if which(os.path.split(flatc_path)[1], path=os.path.split(flatc_path)[0]) is None:
         raise FileNotFoundError(i18n.t("main.file_not_executable") % flatc_path)
-    schema_path = askopenfilename(title=i18n.t("main.tkinter_fbs_select"),
-                                  filetypes=[(i18n.t("main.fbs_filetype"), "*.fbs")])
     if schema_path == "":
-        return os.EX_OK
+        schema_path = askopenfilename(title=i18n.t("main.tkinter_fbs_select"),
+                                      filetypes=[(i18n.t("main.fbs_filetype"), "*.fbs")])
+        if schema_path == "":
+            return os.EX_OK
+    elif not os.path.isfile(schema_path):
+        raise FileNotFoundError(i18n.t("main.file_not_found") % schema_path)
     schema_name = os.path.splitext(os.path.basename(schema_path))[0]
-    binary_paths = askopenfilenames(title=i18n.t("main.tkinter_binaries_select"),
-                                    filetypes=[
-                                        (i18n.t("main.flatc_binary_filetype"), "*." + schema_name)])
-    output_path = askdirectory(title=i18n.t("main.tkinter_output_select"))
+    if len(binary_paths) < 1:
+        binary_paths = askopenfilenames(title=i18n.t("main.tkinter_binaries_select"), filetypes=[
+            (i18n.t("main.flatc_binary_filetype"), "*." + schema_name)])
+        if len(binary_paths) < 1:
+            return os.EX_OK
+    else:
+        binary_paths = [binary_path for binary_path in binary_paths if os.path.isfile(binary_path)]
+    if output_path == "":
+        output_path = askdirectory(title=i18n.t("main.tkinter_output_select"))
+    elif not os.path.isdir(output_path):
+        raise FileNotFoundError(i18n.t("main.directory_not_found") % output_path)
     full_size = sum(os.stat(binary_path).st_size for binary_path in binary_paths)
     with logging_redirect_tqdm():
         pbar = tqdm(total=full_size, position=0, unit="B", unit_scale=True,
@@ -124,6 +133,96 @@ def execute_deserialize(flatc_path: str) -> int | str:
             pbar.set_postfix_str(binary_path)
             pbar.clear()
             deserialize(flatc_path, schema_path, binary_path, output_path)
+            pbar.update(os.stat(binary_path).st_size)
+        pbar.set_postfix_str("")
+        pbar.close()
+    return os.EX_OK
+
+
+def get_schema_paths(root_path: str) -> list[str]:
+    """
+    Получение списка путей к файлам схем Flatbuffers внутри заданной корневой директории.
+    :param root_path: Путь к корневой директории.
+    :return: Список путей к файлам схем.
+    """
+    schema_paths = []
+    if not os.path.isdir(root_path):
+        return schema_paths
+    for subdir, _, files in os.walk(root_path):
+        for file in files:
+            file_path = os.path.abspath(os.path.join(subdir, file))
+            if os.path.splitext(file_path)[1].lower() == ".fbs":
+                schema_paths.append(file_path)
+    return schema_paths
+
+
+def get_binary_tuples(binaries_path: str, schema_paths: list[str]) -> tuple[
+    list[tuple[str, str]], int]:
+    """
+    Получение списка кортежей из двух элементов: (путь к бинарному файлу, путь к соответствующему ему файлу схемы)
+    :param binaries_path: Список путей к бинарным файлам.
+    :param schema_paths: Список путей к файлам схем.
+    :return: Кортеж из двух строковых элементов.
+    """
+    binary_tuples = []
+    full_size = 0
+    for subdir, _, files in os.walk(binaries_path):
+        for file in files:
+            file_path = os.path.abspath(os.path.join(subdir, file))
+            for schema_path in schema_paths:
+                if os.path.splitext(os.path.basename(schema_path))[0].casefold() == \
+                        os.path.splitext(file)[1][1:].casefold():
+                    binary_tuples.append((file_path, schema_path))
+                    full_size += os.stat(file_path).st_size
+                    break
+    return binary_tuples, full_size
+
+
+def execute_deserialize_batch(flatc_path: str, schemas_path: str, binaries_path: str,
+                              output_path: str) -> (int | str):
+    """
+    Десериализация всех файлов Flatbuffers в директории по всем схемам из другой директории.
+    :param flatc_path: Путь к файлу компилятора схемы.
+    :param schemas_path: Путь к директории с файлами схем.
+    :param binaries_path: Путь к директории с бинарными файлами.
+    :param output_path: Путь к директории вывода.
+    :return: Код ошибки или строка об ошибке.
+    """
+    if not os.path.isfile(flatc_path):
+        raise FileNotFoundError(i18n.t("main.file_not_found") % flatc_path)
+    if which(os.path.split(flatc_path)[1], path=os.path.split(flatc_path)[0]) is None:
+        raise FileNotFoundError(i18n.t("main.file_not_executable") % flatc_path)
+    if schemas_path == "":
+        schemas_path = askdirectory(title=i18n.t("main.tkinter_fbs_directory_select"))
+        if schemas_path == "":
+            return os.EX_OK
+    elif not os.path.isdir(schemas_path):
+        raise FileNotFoundError(i18n.t("main.directory_not_found") % schemas_path)
+    if binaries_path == "":
+        binaries_path = askdirectory(title=i18n.t("main.tkinter_binary_directory_select"))
+        if binaries_path == "":
+            return os.EX_OK
+    elif not os.path.isdir(binaries_path):
+        raise FileNotFoundError(i18n.t("main.directory_not_found") % binaries_path)
+    if output_path == "":
+        output_path = askdirectory(title=i18n.t("main.tkinter_output_select"))
+        if output_path == "":
+            output_path = os.path.split(flatc_path)[0]
+    elif not os.path.isdir(output_path):
+        raise FileNotFoundError(i18n.t("main.directory_not_found") % output_path)
+    schema_paths = get_schema_paths(schemas_path)
+    if len(schema_paths) < 1:
+        logging.info(i18n.t("main.no_schema_files_found"), binaries_path)
+        return os.EX_OK
+    binary_tuples, full_size = get_binary_tuples(binaries_path, schema_paths)
+    with logging_redirect_tqdm():
+        pbar = tqdm(total=full_size, position=0, unit="B", unit_scale=True,
+                    desc=i18n.t("main.files"))
+        for binary_path, schema_path in binary_tuples:
+            pbar.set_postfix_str(binary_path)
+            pbar.clear()
+            deserialize(flatc_path, schema_path, binary_path, output_path + os.sep +
+                        os.path.split(os.path.relpath(binary_path, binaries_path))[0])
             pbar.update(os.stat(binary_path).st_size)
         pbar.set_postfix_str("")
         pbar.close()
