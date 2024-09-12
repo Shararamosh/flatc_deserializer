@@ -5,6 +5,7 @@
 import logging
 import os
 import sys
+from threading import Thread
 from locale import getdefaultlocale
 from shutil import which
 from tkinter import Tk
@@ -134,11 +135,22 @@ str) -> (int | str):
     with logging_redirect_tqdm():
         pbar = tqdm(total=full_size, position=0, unit="B", unit_scale=True,
                     desc=i18n.t("main.files"))
-        for binary_path in binary_paths:
-            pbar.set_postfix_str(binary_path)
-            pbar.clear()
+
+        def pbar_deserialize(binary_path: str):
+            """
+            Функция для многопоточного выполнения десериализации.
+            :param binary_path: Путь к бинарному файлу Flatbuffers.
+            """
             deserialize(flatc_path, schema_path, binary_path, output_path)
             pbar.update(os.stat(binary_path).st_size)
+
+        threads = []
+        for binary_path in binary_paths:
+            thread = Thread(target=pbar_deserialize, args=[binary_path])
+            threads.append(thread)
+            thread.start()
+        for thread in threads:
+            thread.join()
         pbar.set_postfix_str("")
         pbar.close()
     return os.EX_OK
@@ -223,12 +235,24 @@ def execute_deserialize_batch(flatc_path: str, schemas_path: str, binaries_path:
     with logging_redirect_tqdm():
         pbar = tqdm(total=full_size, position=0, unit="B", unit_scale=True,
                     desc=i18n.t("main.files"))
-        for binary_path, schema_path in binary_tuples:
-            pbar.set_postfix_str(binary_path)
-            pbar.clear()
+
+        def pbar_deserialize(binary_path: str, schema_path: str):
+            """
+            Функция для многопоточного выполнения десериализации.
+            :param binary_path: Путь к бинарному файлу Flatbuffers.
+            :param schema_path: Путь к схеме Flatbuffers.
+            """
             deserialize(flatc_path, schema_path, binary_path, output_path + os.sep +
                         os.path.split(os.path.relpath(binary_path, binaries_path))[0])
             pbar.update(os.stat(binary_path).st_size)
+
+        threads = []
+        for binary_path, schema_path in binary_tuples:
+            thread = Thread(target=pbar_deserialize, args=[binary_path, schema_path])
+            threads.append(thread)
+            thread.start()
+        for thread in threads:
+            thread.join()
         pbar.set_postfix_str("")
         pbar.close()
     return os.EX_OK
