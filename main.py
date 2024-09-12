@@ -51,19 +51,19 @@ def prepare_app(icon_path: str):
     root.iconphoto(True, PhotoImage(file=get_resource_path(icon_path)))
 
 
-def get_flatc_path(root_path: str, allow_ask: bool, suppress_ask_error: bool = True) -> str:
+def get_flatc_path(root_path: str, allow_ask: bool, suppress_error: bool) -> str:
     """
     Получение пути к файлу компилятора Flatbuffers.
     :param root_path: Путь к текущей рабочей директории.
     :param allow_ask: Позволить открыть файл через диалоговое окно, если файла нет в рабочей директории.
-    :param suppress_ask_error: Игнорировать ошибку FileNotFoundError, если не выводится диалоговое окно для файла.
+    :param suppress_error: Игнорировать ошибку FileNotFoundError.
     :return: Путь к файлу.
     """
     flatc_path = which("flatc", path=root_path + os.sep)
     if flatc_path is not None:
         return os.path.abspath(flatc_path)
     if not allow_ask:
-        if suppress_ask_error:
+        if suppress_error:
             return ""
         raise FileNotFoundError(i18n.t("main.executable_not_found") % "flatc")
     if sys.platform == "win32":
@@ -72,9 +72,13 @@ def get_flatc_path(root_path: str, allow_ask: bool, suppress_ask_error: bool = T
         filetypes = []
     flatc_path = askopenfilename(title=i18n.t("main.tkinter_flatc_select"), filetypes=filetypes)
     if flatc_path == "":
+        if suppress_error:
+            return ""
         raise FileNotFoundError(i18n.t("main.executable_not_found") % "flatc")
     flatc_path = which(os.path.split(flatc_path)[1], path=os.path.split(flatc_path)[0])
     if flatc_path is None:
+        if suppress_error:
+            return ""
         raise FileNotFoundError(i18n.t("main.executable_not_found") % "flatc")
     return os.path.abspath(flatc_path)
 

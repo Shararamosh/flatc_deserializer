@@ -11,6 +11,7 @@ from i18n import t
 from main import prepare_app, get_flatc_path, execute_deserialize_batch
 
 if __name__ == "__main__":
+    sys.tracebacklimit = 0
     prepare_app("images/flatbuffers-batch-logo-clean.png")
     parser = argparse.ArgumentParser(prog=t("main.flatc_deserializer_name"),
                                      description=t("main.flatc_derializer_desc"))
@@ -23,5 +24,5 @@ if __name__ == "__main__":
     parser.add_argument("-f", "--flatc_path", type=str, default="", help=t("main.flatc_path_arg"))
     args = parser.parse_args()
     sys.exit(execute_deserialize_batch(
-        get_flatc_path(os.getcwd(), True) if args.flatc_path == "" else args.flatc_path,
+        get_flatc_path(os.getcwd(), True, False) if args.flatc_path == "" else args.flatc_path,
         args.schemas_path, args.binaries_path, args.output_path))
