@@ -1,12 +1,13 @@
 """
     Десериализация выбранных бинарных файлов Flatbuffers по выбранной схеме.
 """
+# pylint: disable=import-error
 import os
 import sys
 import argparse
 from i18n import t
 
-from main import prepare_app, get_flatc_path, execute_deserialize  # pylint: disable=import-error
+from main import prepare_app, get_flatc_path, execute_deserialize
 
 if __name__ == "__main__":
     prepare_app("images/flatbuffers-logo-clean.png")

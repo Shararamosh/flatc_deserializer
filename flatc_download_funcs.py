@@ -42,16 +42,17 @@ def download_flatc(root_path: str) -> str:
     """
     Скачивание компилятора Flatbuffers в заданную папку.
     :param root_path: Путь для скачивания компилятора.
-    :return: Путь к файлу компилятора.
+    :return: Путь к файлу компилятора, если архив с ним был успешно скачан и распакован.
     """
+    root_path = os.path.abspath(root_path)
     if not os.path.isdir(root_path):
-        raise FileNotFoundError(t("main.directory_not_found"), root_path)
+        os.makedirs(root_path)
     info(t("flatc_download_funcs.download_start"))
     zip_path, _ = request.urlretrieve(get_flatc_url())
     info(t("flatc_download_funcs.download_finish"), zip_path)
     with ZipFile(zip_path, "r") as f:
         f.extractall(root_path)
-    info(t("flatc_download_funcs.unpack_path"), zip_path, root_path)
+        info(t("flatc_download_funcs.unpack_path"), zip_path, root_path)
     os.remove(zip_path)
     info(t("main.file_removed"), zip_path)
     flatc_path = which("flatc", path=root_path + os.sep)

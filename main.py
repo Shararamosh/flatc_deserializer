@@ -1,6 +1,7 @@
 """
     Десериализация бинарных файлов Flatbuffers по заданной схеме.
 """
+# pylint: disable=import-error, line-too-long, too-many-branches
 import logging
 import os
 import sys
@@ -15,8 +16,8 @@ from PIL.ImageTk import PhotoImage
 from tqdm import tqdm
 from tqdm.contrib.logging import logging_redirect_tqdm
 
-from flatc_download_funcs import download_flatc  # pylint: disable=import-error
-from flatc_funcs import deserialize  # pylint: disable=import-error
+from flatc_download_funcs import download_flatc
+from flatc_funcs import deserialize
 
 
 def get_resource_path(filename: str) -> str:
@@ -88,7 +89,7 @@ def execute_download(root_path: str) -> int | str:
     if flatc_path != "":
         logging.info(i18n.t("main.flatc_already_exists"), flatc_path)
     else:
-        download_flatc(os.getcwd())
+        download_flatc(root_path)
     return os.EX_OK
 
 

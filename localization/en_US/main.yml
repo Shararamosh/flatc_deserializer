@@ -11,7 +11,7 @@ executable_not_found: Executable %s not found.
 file_not_found: File %s not found.
 directory_not_found: Directory %s not found.
 file_removed: File %s is removed.
-flatc_already_exists: "Flabuffers schema compiler already exists in working directory: %s."
+flatc_already_exists: "Flabuffers schema compiler already exists in directory: %s."
 file_not_executable: File %s is not executable.
 tkinter_fbs_directory_select: Select directory with schema files
 tkinter_binary_directory_select: Select directory with binary files
@@ -24,3 +24,7 @@ binary_files_arg: Binary files
 flatc_path_arg: Path to schema compiler (flatc)
 flatc_deserializer_name: Flatbuffers Batch Deserializer
 flatc_deserializer_desc: Program for batch deserialization of Flatbuffers binary files.
+file_failed_to_open: Failed to open file %s.
+flatc_downloader_name: Flatbuffers Schema Compiler Downloader
+flatc_downloader_desc: Program for downloading latest version of Flatbuffers schema compiler for this platform.
+download_directory_arg: Directory for saving downloaded files

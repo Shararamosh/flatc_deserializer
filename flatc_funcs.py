@@ -21,7 +21,15 @@ def deserialize(flatc_path: str, schema_path: str, binary_path: str, output_path
     flatc_path = os.path.abspath(flatc_path)
     schema_path = os.path.abspath(schema_path)
     binary_path = os.path.abspath(binary_path)
+    binary_name = os.path.splitext(os.path.basename(binary_path))[0]
     output_path = os.path.abspath(output_path)
+    json_path = os.path.abspath(output_path + os.sep + binary_name + ".json")
+    previous_json_contents = None
+    try:
+        with open(json_path, "rb") as json_file:
+            previous_json_contents = json_file.read()
+    except OSError:
+        pass
     args = [flatc_path]
     if output_path == "":
         output_path = binary_path
@@ -41,11 +49,15 @@ def deserialize(flatc_path: str, schema_path: str, binary_path: str, output_path
     if proc.stdout is not None and proc.stdout != "":
         info(t("flatc_funcs.run_ok"), " ".join(args))
         info(proc.stdout)
-    binary_name = os.path.splitext(os.path.basename(binary_path))[0]
-    json_path = os.path.abspath(output_path + os.sep + binary_name + ".json")
     if not os.path.isfile(json_path):
         info(t("flatc_funcs.json_error"), binary_path)
         return {}
-    info(t("flatc_funcs.json_ok"), binary_path, json_path)
-    with open(json_path, "r", encoding="utf-8") as json_file:
-        return loads(json_file.read())
+    try:
+        with open(json_path, "rb") as json_file:
+            current_json_contents = json_file.read()
+    except OSError:
+        info(t("main.file_failed_to_open"), json_path)
+        return {}
+    if current_json_contents != previous_json_contents:
+        info(t("flatc_funcs.json_ok"), binary_path, json_path)
+    return loads(current_json_contents.decode("utf-8"))

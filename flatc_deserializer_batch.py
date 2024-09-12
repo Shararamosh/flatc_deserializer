@@ -2,13 +2,13 @@
     Десериализация бинарных файлов Flatbuffers в выбранной директории по всем схемам в другой
     выбранной директории.
 """
+# pylint: disable=import-error
 import os
 import sys
 import argparse
 from i18n import t
 
-from main import prepare_app, get_flatc_path, \
-    execute_deserialize_batch  # pylint: disable=import-error
+from main import prepare_app, get_flatc_path, execute_deserialize_batch
 
 if __name__ == "__main__":
     prepare_app("images/flatbuffers-batch-logo-clean.png")
