@@ -5,6 +5,7 @@
 import os
 import platform
 import sys
+import errno
 from shutil import which
 from zipfile import ZipFile
 from logging import info
@@ -35,7 +36,7 @@ def get_flatc_url() -> str:
         if platform.processor() == "i386":  # Intel macOS.
             return root_url + "/MacIntel.flatc.binary.zip"
         return root_url + "/Mac.flatc.binary.zip"
-    raise OSError(t("main.unsupported_platform").format(platform.platform(True)))
+    raise OSError(errno.ENOSYS, t("main.unsupported_platform").format(platform.platform(True)))
 
 
 def download_flatc(root_path: str) -> str:
@@ -57,5 +58,5 @@ def download_flatc(root_path: str) -> str:
     info(t("main.file_removed"), zip_path)
     flatc_path = which("flatc", path=root_path + os.sep)
     if flatc_path is None:
-        raise FileNotFoundError(t("main.executable_not_found") % "flatc")
+        raise FileNotFoundError(errno.ENOENT, t("main.executable_not_found"), "flatc")
     return os.path.abspath(flatc_path)

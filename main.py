@@ -5,6 +5,7 @@
 import logging
 import os
 import sys
+import errno
 from locale import getdefaultlocale
 from shutil import which
 from tkinter import Tk
@@ -66,7 +67,7 @@ def get_flatc_path(root_path: str, allow_ask: bool, suppress_error: bool) -> str
     if not allow_ask:
         if suppress_error:
             return ""
-        raise FileNotFoundError(i18n.t("main.executable_not_found") % "flatc")
+        raise FileNotFoundError(errno.ENOENT, i18n.t("main.executable_not_found"), "flatc")
     if sys.platform == "win32":
         filetypes = [(i18n.t("main.exe_filetype"), "*.exe")]
     else:
@@ -75,12 +76,12 @@ def get_flatc_path(root_path: str, allow_ask: bool, suppress_error: bool) -> str
     if flatc_path == "":
         if suppress_error:
             return ""
-        raise FileNotFoundError(i18n.t("main.executable_not_found") % "flatc")
+        raise FileNotFoundError(errno.ENOENT, i18n.t("main.executable_not_found"), "flatc")
     flatc_path = which(os.path.split(flatc_path)[1], path=os.path.split(flatc_path)[0])
     if flatc_path is None:
         if suppress_error:
             return ""
-        raise FileNotFoundError(i18n.t("main.executable_not_found") % "flatc")
+        raise FileNotFoundError(errno.ENOENT, i18n.t("main.executable_not_found"), "flatc")
     return os.path.abspath(flatc_path)
 
 
@@ -109,28 +110,30 @@ str) -> (int | str):
     :return: Код ошибки или строка об ошибке.
     """
     if not os.path.isfile(flatc_path):
-        raise FileNotFoundError(i18n.t("main.file_not_found") % flatc_path)
+        raise FileNotFoundError(errno.ENOENT, i18n.t("main.file_not_found"), flatc_path)
     if which(os.path.split(flatc_path)[1], path=os.path.split(flatc_path)[0]) is None:
-        raise FileNotFoundError(i18n.t("main.file_not_executable") % flatc_path)
+        raise FileNotFoundError(errno.ENOENT, i18n.t("main.file_not_executable"), flatc_path)
     if schema_path == "":
         schema_path = askopenfilename(title=i18n.t("main.tkinter_fbs_select"),
                                       filetypes=[(i18n.t("main.fbs_filetype"), "*.fbs")])
         if schema_path == "":
-            return os.EX_OK
-    elif not os.path.isfile(schema_path):
-        raise FileNotFoundError(i18n.t("main.file_not_found") % schema_path)
+            raise IOError(errno.EIO, i18n.t("main.no_file_selected"))
+    if not os.path.isfile(schema_path):
+        raise FileNotFoundError(errno.ENOENT, i18n.t("main.file_not_found"), schema_path)
     schema_name = os.path.splitext(os.path.basename(schema_path))[0]
     if len(binary_paths) < 1:
         binary_paths = askopenfilenames(title=i18n.t("main.tkinter_binaries_select"), filetypes=[
             (i18n.t("main.flatc_binary_filetype"), "*." + schema_name)])
         if len(binary_paths) < 1:
-            return os.EX_OK
+            raise IOError(errno.EIO, i18n.t("main.no_files_selected"))
     else:
         binary_paths = [binary_path for binary_path in binary_paths if os.path.isfile(binary_path)]
     if output_path == "":
         output_path = askdirectory(title=i18n.t("main.tkinter_output_select"))
+        if output_path == "":
+            raise IOError(errno.EIO, i18n.t("main.no_directory_selected"))
     elif not os.path.isdir(output_path):
-        raise FileNotFoundError(i18n.t("main.directory_not_found") % output_path)
+        raise FileNotFoundError(errno.ENOENT, i18n.t("main.directory_not_found"), output_path)
     full_size = sum(os.stat(binary_path).st_size for binary_path in binary_paths)
     with logging_redirect_tqdm():
         pbar = tqdm(total=full_size, position=0, unit="B", unit_scale=True,
@@ -199,27 +202,29 @@ def execute_deserialize_batch(flatc_path: str, schemas_path: str, binaries_path:
     :return: Код ошибки или строка об ошибке.
     """
     if not os.path.isfile(flatc_path):
-        raise FileNotFoundError(i18n.t("main.file_not_found") % flatc_path)
+        raise FileNotFoundError(errno.ENOENT, i18n.t("main.file_not_found"), flatc_path)
     if which(os.path.split(flatc_path)[1], path=os.path.split(flatc_path)[0]) is None:
-        raise FileNotFoundError(i18n.t("main.file_not_executable") % flatc_path)
+        raise FileNotFoundError(errno.ENOENT, i18n.t("main.file_not_executable"), flatc_path)
     if schemas_path == "":
         schemas_path = askdirectory(title=i18n.t("main.tkinter_fbs_directory_select"))
         if schemas_path == "":
-            return os.EX_OK
-    elif not os.path.isdir(schemas_path):
-        raise FileNotFoundError(i18n.t("main.directory_not_found") % schemas_path)
+            raise IOError(errno.EIO, i18n.t("main.no_directory_selected"))
+    if not os.path.isdir(schemas_path):
+        raise FileNotFoundError(errno.ENOENT, i18n.t("main.directory_not_found"), schemas_path)
     if binaries_path == "":
         binaries_path = askdirectory(title=i18n.t("main.tkinter_binary_directory_select"))
         if binaries_path == "":
-            return os.EX_OK
-    elif not os.path.isdir(binaries_path):
-        raise FileNotFoundError(i18n.t("main.directory_not_found") % binaries_path)
+            raise IOError(errno.EIO, i18n.t("main.no_directory_selected"))
+    if not os.path.isdir(binaries_path):
+        raise FileNotFoundError(errno.ENOENT, i18n.t("main.directory_not_found"), binaries_path)
     if output_path == "":
         output_path = askdirectory(title=i18n.t("main.tkinter_output_select"))
         if output_path == "":
             output_path = os.path.split(flatc_path)[0]
-    elif not os.path.isdir(output_path):
-        raise FileNotFoundError(i18n.t("main.directory_not_found") % output_path)
+            if output_path == "":
+                raise IOError(errno.EIO, i18n.t("main.no_directory_selected"))
+    if not os.path.isdir(output_path):
+        raise FileNotFoundError(errno.ENOENT, i18n.t("main.directory_not_found"), output_path)
     schema_paths = get_schema_paths(schemas_path)
     if len(schema_paths) < 1:
         logging.info(i18n.t("main.no_schema_files_found"), binaries_path)
