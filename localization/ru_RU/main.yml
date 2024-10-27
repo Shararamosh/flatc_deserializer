@@ -7,11 +7,11 @@ flatc_binary_filetype: Бинарный файл Flatbuffers
 tkinter_output_select: Выбор директории вывода
 files: Файлы
 unsupported_platform: "Запуск невозможен на неподдерживаемой платформе: %s."
-executable_not_found: Исполняемый файл не найден
-file_not_found: Файл не найден
-directory_not_found: Директория не найдена
+executable_not_found: Исполняемый файл %s не найден.
+file_not_found: Файл %s не найден.
+directory_not_found: Директория %s не найдена.
 file_removed: Файл %s был удалён.
-flatc_already_exists: "Компилятор схемы Flatbuffers уже существует в директории: %s"
+flatc_already_exists: Компилятор схемы Flatbuffers уже существует в директории %s.
 file_not_executable: Файл не является исполняемым
 tkinter_fbs_directory_select: Выбор директории с файлами схем
 tkinter_binary_directory_select: Выбор директории с бинарными файлами

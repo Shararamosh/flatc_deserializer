@@ -1,0 +1,31 @@
+[project]
+name="flatc_deserializer"
+dynamic = ["version"]
+dependencies = [
+    "pillow",
+    "tqdm",
+    "i18nice[YAML]"
+]
+authors = [{name = "Shararamosh"}]
+description = "Program for batch deserialization of Flatbuffers binary files."
+keywords = [
+    "json",
+    "flatbuffers",
+    "deserializer",
+    "batch-converter",
+    "fbs",
+    "flatbuffers-schema",
+    "flabuffers-compiler",
+    "flatc"
+]
+classifiers = [
+    "Development Status :: 5 - Production/Stable",
+    "Environment :: Console",
+    "Intended Audience :: Developers",
+    "Natural Language :: English",
+    "Natural Language :: Russian",
+    "Operating System :: OS Independent",
+    "Programming Language :: Python",
+    "Topic :: File Formats :: JSON",
+    "Topic :: Utilities"
+]

@@ -7,11 +7,11 @@ import sys
 import argparse
 from i18n import t
 
-from main import prepare_app, get_flatc_path, execute_deserialize
+from main import init_app, get_flatc_path, execute_deserialize
 
 if __name__ == "__main__":
     sys.tracebacklimit = 0
-    prepare_app("images/flatbuffers-logo-clean.png")
+    init_app("images/flatbuffers-logo-clean.png")
     parser = argparse.ArgumentParser(prog=t("main.flatc_deserializer_name"),
                                      description=t("main.flatc_deserializer_desc"))
     parser.add_argument("-s", "--schema_path", type=str, default="", help=t("main.schema_file_arg"))

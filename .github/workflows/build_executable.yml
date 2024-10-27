@@ -16,7 +16,7 @@ jobs:
           python-version: "3.11"
       - name: Install requirements
         run: pip install pillow tqdm i18nice[YAML] pyinstaller
-      - name: Run PyInstaller for Deserializer and Downloader
+      - name: Run PyInstaller for Deserializer, Downloader and Batch Deserializer
         run: |
           pyinstaller --onefile --name="flatc_deserializer" --console --icon=images\flatbuffers-logo-clean.png --add-data="images:images" --add-data="localization:localization" flatc_deserializer.py
           pyinstaller --onefile --name="flatc_downloader" --console --icon=images\flatbuffers-downloader-logo-clean.png --add-data="images:images" --add-data="localization:localization" flatc_downloader.py

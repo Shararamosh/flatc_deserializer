@@ -7,11 +7,11 @@ import sys
 import argparse
 from i18n import t
 
-from main import prepare_app, execute_download
+from main import init_app, execute_download
 
 if __name__ == "__main__":
     sys.tracebacklimit = 0
-    prepare_app("images/flatbuffers-downloader-logo-clean.png")
+    init_app("images/flatbuffers-downloader-logo-clean.png")
     parser = argparse.ArgumentParser(prog=t("main.flatc_downloader_name"),
                                      description=t("main.flatc_downloader_desc"))
     parser.add_argument("downloads_directory", nargs="?", type=str, default=os.getcwd(),
