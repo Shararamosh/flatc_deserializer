@@ -7,7 +7,7 @@ dependencies = [
     "i18nice[YAML]"
 ]
 authors = [{name = "Shararamosh"}]
-description = "Program for batch deserialization of Flatbuffers binary files."
+description = "Program for deserialization of Flatbuffers binary files based on single or multiple schemas."
 keywords = [
     "json",
     "flatbuffers",

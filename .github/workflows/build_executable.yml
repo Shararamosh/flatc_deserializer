@@ -6,6 +6,7 @@ on:
       - master
 jobs:
   build-windows:
+    name: Build for Windows
     runs-on: windows-latest
     steps:
       - name: Checkout
@@ -15,9 +16,12 @@ jobs:
         with:
           python-version: "3.11"
       - name: Install requirements
-        run: pip install pillow tqdm i18nice[YAML] pyinstaller
+        run: pip install -r requirements.txt
+      - name: Install PyInstaller
+        run: pip install pyinstaller
       - name: Run PyInstaller for Deserializer, Downloader and Batch Deserializer
         run: |
+          set PYTHONOPTIMIZE=2
           pyinstaller --onefile --name="flatc_deserializer" --console --icon=images\flatbuffers-logo-clean.png --add-data="images:images" --add-data="localization:localization" flatc_deserializer.py
           pyinstaller --onefile --name="flatc_downloader" --console --icon=images\flatbuffers-downloader-logo-clean.png --add-data="images:images" --add-data="localization:localization" flatc_downloader.py
           pyinstaller --onefile --name="flatc_deserializer_batch" --console --icon=images\flatbuffers-batch-logo-clean.png --add-data="images:images" --add-data="localization:localization" flatc_deserializer_batch.py

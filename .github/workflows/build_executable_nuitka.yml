@@ -6,6 +6,7 @@ on:
       - master
 jobs:
   build-windows:
+    name: Build for Windows
     runs-on: windows-latest
     steps:
       - name: Checkout
@@ -15,7 +16,7 @@ jobs:
         with:
           python-version: "3.11"
       - name: Install requirements
-        run: pip install pillow tqdm i18nice[YAML] imageio
+        run: pip install -r requirements.txt
       - name: Run Nuitka for Deserializer
         uses: Nuitka/Nuitka-Action@main
         with:
@@ -24,8 +25,10 @@ jobs:
           onefile: true
           enable-plugins: tk-inter
           include-data-dir: |
-            localization=localization
-            images=images
+            .\localization=localization
+            .\images=images
+          product-name: Flatbuffers Deserializer
+          file-description: Program for deserialization of Flatbuffers binary files based on single schema.
           windows-icon-from-ico: "images/flatbuffers-logo-clean.png"
       - name: Run Nuitka for Downloader
         uses: Nuitka/Nuitka-Action@main
@@ -35,8 +38,10 @@ jobs:
           onefile: true
           enable-plugins: tk-inter
           include-data-dir: |
-            localization=localization
-            images=images
+            .\localization=localization
+            .\images=images
+          product-name: Flatbuffers Schema Compiler Downloader
+          file-description: Program for downloading latest version of Flatbuffers schema compiler for Windows.
           windows-icon-from-ico: "images/flatbuffers-downloader-logo-clean.png"
       - name: Run Nuitka for Batch Deserializer
         uses: Nuitka/Nuitka-Action@main
@@ -46,8 +51,10 @@ jobs:
           onefile: true
           enable-plugins: tk-inter
           include-data-dir: |
-            localization=localization
-            images=images
+            .\localization=localization
+            .\images=images
+          product-name: Flatbuffers Batch Deserializer
+          file-description: Program for deserialization of Flatbuffers binary files based on multiple schemas.
           windows-icon-from-ico: "images/flatbuffers-batch-logo-clean.png"
       - name: Move Executables from build to root directory
         run: |
