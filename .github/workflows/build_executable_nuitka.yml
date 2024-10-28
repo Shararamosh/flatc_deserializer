@@ -11,6 +11,10 @@ jobs:
     steps:
       - name: Checkout
         uses: actions/checkout@v4
+        with:
+          fetch-depth: 0
+      - name: Extract version from tag
+        uses: damienaicheh/extract-version-from-tag-action@v1.3.0
       - name: Install Python
         uses: actions/setup-python@v5
         with:
@@ -30,6 +34,7 @@ jobs:
             .\localization=localization
             .\images=images
           product-name: Flatbuffers Deserializer
+          product-version: ${{ env.MAJOR }}.${{ env.MINOR }}.${{ env.PATCH }}
           file-description: Program for deserialization of Flatbuffers binary files based on single schema.
           windows-icon-from-ico: "images/flatbuffers-logo-clean.png"
       - name: Run Nuitka for Downloader
@@ -43,6 +48,7 @@ jobs:
             .\localization=localization
             .\images=images
           product-name: Flatbuffers Schema Compiler Downloader
+          product-version: ${{ env.MAJOR }}.${{ env.MINOR }}.${{ env.PATCH }}
           file-description: Program for downloading latest version of Flatbuffers schema compiler for Windows.
           windows-icon-from-ico: "images/flatbuffers-downloader-logo-clean.png"
       - name: Run Nuitka for Batch Deserializer
@@ -56,6 +62,7 @@ jobs:
             .\localization=localization
             .\images=images
           product-name: Flatbuffers Batch Deserializer
+          product-version: ${{ env.MAJOR }}.${{ env.MINOR }}.${{ env.PATCH }}
           file-description: Program for deserialization of Flatbuffers binary files based on multiple schemas.
           windows-icon-from-ico: "images/flatbuffers-batch-logo-clean.png"
       - name: Move Executables from build to root directory
