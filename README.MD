@@ -6,5 +6,5 @@ Set of console tools for batch deserialization of Flatbuffers binary files using
 - [tqdm](https://pypi.org/project/tqdm/)
 - [i18nice[YAML]](https://pypi.org/project/i18nice/)
 ## Latest Windows releases:
-- [PyInstaller](releases/tag/latest)
-- [Nuitka](releases/tag/latest-nuitka)
+- [PyInstaller](https://github.com/Shararamosh/flatc_deserializer/releases/tag/latest)
+- [Nuitka](https://github.com/Shararamosh/flatc_deserializer/releases/tag/latest-nuitka)
