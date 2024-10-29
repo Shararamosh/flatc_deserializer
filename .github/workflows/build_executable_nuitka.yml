@@ -14,7 +14,7 @@ jobs:
       - name: Install Python
         uses: actions/setup-python@v5
         with:
-          python-version: "3.11"
+          python-version: 3.11
       - name: Install requirements
         run: |
           pip install -r requirements.txt
@@ -27,9 +27,9 @@ jobs:
           onefile: true
           enable-plugins: tk-inter
           include-data-dir: |
-            .\localization=localization
-            .\images=images
-          windows-icon-from-ico: "images/flatbuffers-logo-clean.png"
+            localization=localization
+            images=images
+          windows-icon-from-ico: images/flatbuffers-logo-clean.png
       - name: Run Nuitka for Downloader
         uses: Nuitka/Nuitka-Action@main
         with:
@@ -38,9 +38,9 @@ jobs:
           onefile: true
           enable-plugins: tk-inter
           include-data-dir: |
-            .\localization=localization
-            .\images=images
-          windows-icon-from-ico: "images/flatbuffers-downloader-logo-clean.png"
+            localization=localization
+            images=images
+          windows-icon-from-ico: images/flatbuffers-downloader-logo-clean.png
       - name: Run Nuitka for Batch Deserializer
         uses: Nuitka/Nuitka-Action@main
         with:
@@ -49,9 +49,9 @@ jobs:
           onefile: true
           enable-plugins: tk-inter
           include-data-dir: |
-            .\localization=localization
-            .\images=images
-          windows-icon-from-ico: "images/flatbuffers-batch-logo-clean.png"
+            localization=localization
+            images=images
+          windows-icon-from-ico: images/flatbuffers-batch-logo-clean.png
       - name: Move Executables from build to root directory
         run: |
           move build\flatc_deserializer.exe .

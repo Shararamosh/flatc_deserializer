@@ -6,13 +6,13 @@ tkinter_binaries_select: Select binary files
 flatc_binary_filetype: Binary Flatbuffers file
 tkinter_output_select: Select output directory
 files: Files
-unsupported_platform: "%s platform is not supported."
+unsupported_platform: %s platform is not supported.
 executable_not_found: Executable %s not found.
 file_not_found: File %s not found.
 directory_not_found: Directory %s not found.
 file_removed: File %s is removed.
 flatc_already_exists: Flatbuffers schema compiler already exists in directory %s.
-file_not_executable: File is not executable
+file_not_executable: File %s is not executable.
 tkinter_fbs_directory_select: Select directory with schema files
 tkinter_binary_directory_select: Select directory with binary files
 no_schema_files_found: No schema files found in directory %s.
@@ -23,12 +23,12 @@ schema_file_arg: Schema file
 binary_files_arg: Binary files
 flatc_path_arg: Path to schema compiler (flatc)
 flatc_deserializer_name: Flatbuffers Deserializer
-flatc_deserializer_desc: Program for deserialization of Flatbuffers binary files based on single schema.
+flatc_deserializer_desc: Tool for deserialization of Flatbuffers binary files based on single schema.
 flatc_deserializer_batch_name: Flatbuffers Batch Deserializer
-flatc_deserializer_batch_desc: Program for deserialization of Flatbuffers binary files based on multiple schemas.
+flatc_deserializer_batch_desc: Tool for deserialization of Flatbuffers binary files based on multiple schemas.
 file_failed_to_open: Failed to open file %s.
 flatc_downloader_name: Flatbuffers Schema Compiler Downloader
-flatc_downloader_desc: Program for downloading latest version of Flatbuffers schema compiler for this platform.
+flatc_downloader_desc: Tool for downloading latest version of Flatbuffers schema compiler for this platform.
 download_directory_arg: Directory for saving downloaded files
 no_files_selected: No files were selected.
 no_directory_selected: No directory was selected.

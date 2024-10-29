@@ -6,13 +6,13 @@ tkinter_binaries_select: Выбор бинарных файлов
 flatc_binary_filetype: Бинарный файл Flatbuffers
 tkinter_output_select: Выбор директории вывода
 files: Файлы
-unsupported_platform: "Платформа %s не поддерживается."
+unsupported_platform: Платформа %s не поддерживается.
 executable_not_found: Исполняемый файл %s не найден.
 file_not_found: Файл %s не найден.
 directory_not_found: Директория %s не найдена.
 file_removed: Файл %s был удалён.
 flatc_already_exists: Компилятор схемы Flatbuffers уже существует в директории %s.
-file_not_executable: Файл не является исполняемым
+file_not_executable: Файл %s не является исполняемым.
 tkinter_fbs_directory_select: Выбор директории с файлами схем
 tkinter_binary_directory_select: Выбор директории с бинарными файлами
 no_schema_files_found: Файлы схем не были найдены в директории %s.
@@ -23,12 +23,12 @@ schema_file_arg: Файл схемы
 binary_files_arg: Бинарные файлы
 flatc_path_arg: Путь к компилятору схемы (flatc)
 flatc_deserializer_name: Flatbuffers Deserializer
-flatc_deserializer_desc: Программа для десериализации бинарных файлов Flatbuffers, основанных на одной схеме.
+flatc_deserializer_desc: Утилита для десериализации бинарных файлов Flatbuffers, основанных на одной схеме.
 flatc_deserializer_batch_name: Flatbuffers Batch Deserializer
-flatc_deserializer_batch_desc: Программа для десериализации бинарных файлов Flatbuffers, основанных на нескольких схемах.
+flatc_deserializer_batch_desc: Утилита для десериализации бинарных файлов Flatbuffers, основанных на нескольких схемах.
 file_failed_to_open: Не удалось открыть файл %s.
 flatc_downloader_name: Flatbuffers Schema Compiler Downloader
-flatc_downloader_desc: Программа для скачивания последней версии компилятора схемы Flatbuffers для данной платформы.
+flatc_downloader_desc: Утилита для скачивания последней версии компилятора схемы Flatbuffers для данной платформы.
 download_directory_arg: Директория для сохранения скачанных файлов
 no_files_selected: Файлы не были выбраны.
 no_directory_selected: Директория не была выбрана.

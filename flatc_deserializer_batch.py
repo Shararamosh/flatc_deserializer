@@ -11,7 +11,6 @@ from i18n import t
 from main import init_app, get_flatc_path, execute_deserialize_batch
 
 if __name__ == "__main__":
-    sys.tracebacklimit = 0
     init_app("images/flatbuffers-batch-logo-clean.png")
     parser = argparse.ArgumentParser(prog=t("main.flatc_deserializer_batch_name"),
                                      description=t("main.flatc_deserializer_batch_desc"))

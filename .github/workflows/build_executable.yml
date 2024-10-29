@@ -1,4 +1,4 @@
-name: Build Windows Executables
+name: Build Windows Executables with PyInstaller
 permissions: write-all
 on:
   push:
@@ -14,7 +14,7 @@ jobs:
       - name: Install Python
         uses: actions/setup-python@v5
         with:
-          python-version: "3.11"
+          python-version: 3.11
       - name: Install requirements
         run: pip install -r requirements.txt
       - name: Install PyInstaller

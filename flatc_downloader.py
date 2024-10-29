@@ -10,7 +10,6 @@ from i18n import t
 from main import init_app, execute_download
 
 if __name__ == "__main__":
-    sys.tracebacklimit = 0
     init_app("images/flatbuffers-downloader-logo-clean.png")
     parser = argparse.ArgumentParser(prog=t("main.flatc_downloader_name"),
                                      description=t("main.flatc_downloader_desc"))
