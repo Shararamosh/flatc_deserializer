@@ -194,23 +194,35 @@ def get_schema_paths(root_path: str) -> list[str]:
     return schema_paths
 
 
-def get_binary_tuples(binaries_path: str, schema_paths: list[str]) -> list[tuple[str, str]]:
+def get_binary_tuples(binary_paths: list[str], schema_paths: list[str]) -> list[tuple[str, str]]:
     """
     Получение списка кортежей из двух элементов: (путь к бинарному файлу, путь к соответствующему ему файлу схемы)
-    :param binaries_path: Список путей к бинарным файлам.
+    :param binary_paths: Список путей к бинарным файлам или директориям с ними.
     :param schema_paths: Список путей к файлам схем.
     :return: Кортеж из двух строковых элементов.
     """
     binary_tuples = []
-    for subdir, _, files in os.walk(binaries_path):
-        for file in files:
-            file_path = os.path.abspath(os.path.join(subdir, file))
+    for _, binary_path in enumerate(binary_paths):
+        if os.path.isfile(binary_path):
+            file_path = os.path.abspath(binary_path)
             for schema_path in schema_paths:
                 schema_ext = os.path.splitext(os.path.basename(schema_path))[0]
-                file_ext = os.path.splitext(file)[1][1:]
+                file_ext = os.path.splitext(file_path)[1][1:]
                 if schema_ext.casefold() == file_ext.casefold():
                     binary_tuples.append((file_path, schema_path))
                     break
+            continue
+        if not os.path.isdir(binary_path):
+            continue
+        for subdir, _, files in os.walk(binary_path):
+            for file in files:
+                file_path = os.path.abspath(os.path.join(subdir, file))
+                for schema_path in schema_paths:
+                    schema_ext = os.path.splitext(os.path.basename(schema_path))[0]
+                    file_ext = os.path.splitext(file_path)[1][1:]
+                    if schema_ext.casefold() == file_ext.casefold():
+                        binary_tuples.append((file_path, schema_path))
+                        break
     return binary_tuples
 
 
@@ -252,7 +264,7 @@ def execute_deserialize_batch(flatc_path: str, schemas_path: str, binaries_path:
     if len(schema_paths) < 1:
         logging.info(i18n.t("main.no_schema_files_found"), binaries_path)
         return os.EX_OK
-    binary_tuples = get_binary_tuples(binaries_path, schema_paths)
+    binary_tuples = get_binary_tuples([binaries_path], schema_paths)
     with logging_redirect_tqdm():
         pbar = tqdm(total=len(binary_tuples), desc=i18n.t("main.files"))
         with ThreadPoolExecutor() as executor:
