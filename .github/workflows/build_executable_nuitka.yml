@@ -46,7 +46,7 @@ jobs:
         with:
           nuitka-version: main
           script-name: flatc_deserializer_batch.py
-          onefile: true
+          mode: app
           enable-plugins: tk-inter
           include-data-dir: |
             localization=localization
