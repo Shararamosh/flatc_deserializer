@@ -3,7 +3,7 @@ source_files: Source files
 source_binaries: Source binary files
 source_schemas: Source schemas
 destination_files: Destination files
-destination_binaries: Destination binaries
+destination_binaries: Destination binary files
 deserialize: Deserialize
 destination_options: Destination file options
 button_add: Add...
@@ -19,3 +19,4 @@ flatc_not_found: Flatbuffers Schema Compiler (flatc) not found.
 error: Error
 result_done: Done
 result_error: Error
+schema_not_found: Schema not found

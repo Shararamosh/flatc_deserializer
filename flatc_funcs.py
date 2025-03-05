@@ -9,7 +9,8 @@ from subprocess import run, CalledProcessError
 from i18n import t
 
 
-def deserialize(flatc_path: str, schema_path: str, binary_path: str, output_path: str = "", return_dict = True) -> dict:
+def deserialize(flatc_path: str, schema_path: str, binary_path: str, output_path: str = "",
+                return_dict=True) -> dict:
     """
     Десериализация бинарного файла, используя схему Flatbuffers.
     :param flatc_path: Путь к компилятору схемы.
@@ -19,6 +20,9 @@ def deserialize(flatc_path: str, schema_path: str, binary_path: str, output_path
     :param return_dict: Если True, возвращать словарь из прочитанного файла. Иначе - путь к файлу.
     :return: Десериализованный бинарный файл в виде словаря.
     """
+    if not os.path.isfile(flatc_path) or not os.path.isfile(schema_path) or not os.path.isfile(
+            binary_path):
+        return {} if return_dict else ""
     flatc_path = os.path.abspath(flatc_path)
     schema_path = os.path.abspath(schema_path)
     binary_path = os.path.abspath(binary_path)
@@ -46,27 +50,19 @@ def deserialize(flatc_path: str, schema_path: str, binary_path: str, output_path
         info(t("flatc_funcs.run_error"), " ".join(cpe.cmd), cpe.returncode)
         if cpe.stderr is not None and cpe.stderr != "":
             info(cpe.stderr)
-        if return_dict:
-            return {}
-        return ""
+        return {} if return_dict else ""
     if proc.stdout is not None and proc.stdout != "":
         info(t("flatc_funcs.run_ok"), " ".join(args))
         info(proc.stdout)
     if not os.path.isfile(json_path):
         info(t("flatc_funcs.json_error"), binary_path)
-        if return_dict:
-            return {}
-        return ""
+        return {} if return_dict else ""
     try:
         with open(json_path, "rb") as json_file:
             current_json_contents = json_file.read()
     except OSError:
         info(t("main.file_failed_to_open"), json_path)
-        if return_dict:
-            return {}
-        return ""
+        return {} if return_dict else ""
     if current_json_contents != previous_json_contents:
         info(t("flatc_funcs.json_ok"), binary_path, json_path)
-    if return_dict:
-        return loads(current_json_contents.decode("utf-8"))
-    return json_path
+    return loads(current_json_contents.decode("utf-8")) if return_dict else json_path

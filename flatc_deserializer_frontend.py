@@ -3,14 +3,17 @@
 """
 # pylint: disable=import-error, too-many-instance-attributes, too-many-statements
 import os
+from collections.abc import Callable
+from importlib import import_module
 from tkinter import ttk
+
 from PIL.ImageTk import PhotoImage
 from PIL import Image
 from i18n import t
 import customtkinter as CTk
 from CTkMenuBar import CTkMenuBar
 from CTkMessagebox import CTkMessagebox
-import pywinstyles
+
 from main import init_localization, get_resource_path, execute_download, get_flatc_path, \
     get_binary_tuples
 from flatc_funcs import deserialize
@@ -56,14 +59,20 @@ class Deserializer(CTk.CTk):
                                                columns=("file", "file_size"), show="headings")
         self.src_binaries_table.heading("file", text=t("frontend.source_file_loc"))
         self.src_binaries_table.heading("file_size", text=t("frontend.file_size"))
-        self.src_binaries_table.pack(fill=CTk.BOTH, expand=True, padx=10, pady=10)
-        pywinstyles.apply_dnd(self.src_binaries_table.winfo_id(), self.on_binary_dropped)
+        self.src_binaries_frame.grid_rowconfigure(0, weight=1)
+        self.src_binaries_frame.grid_columnconfigure(0, weight=1)
+        self.src_binaries_frame.grid_propagate(False)
+        self.src_binaries_table.grid(row=0, column=0, padx=10, pady=10, sticky=CTk.NSEW)
+        self.attempt_apply_dnd(self.src_binaries_table.winfo_id(), self.on_binary_dropped)
         self.src_schemas_frame = ttk.LabelFrame(self.src_files_frame,
                                                 text=t("frontend.source_schemas"))
         self.src_schemas_frame.grid(row=1, column=0, padx=10, pady=10, sticky=CTk.NSEW)
         self.src_schemas_table = ttk.Treeview(self.src_schemas_frame, columns="file", show="")
-        self.src_schemas_table.pack(fill=CTk.BOTH, expand=True, padx=10, pady=10)
-        pywinstyles.apply_dnd(self.src_schemas_table.winfo_id(), self.on_schema_dropped)
+        self.src_schemas_frame.grid_rowconfigure(0, weight=1)
+        self.src_schemas_frame.grid_columnconfigure(0, weight=1)
+        self.src_schemas_frame.grid_propagate(False)
+        self.src_schemas_table.grid(row=0, column=0, padx=10, pady=10, sticky=CTk.NSEW)
+        self.attempt_apply_dnd(self.src_schemas_table.winfo_id(), self.on_schema_dropped)
         self.dest_files_frame = ttk.LabelFrame(self.files_frame,
                                                text=t("frontend.destination_files"))
         self.dest_files_frame.grid_rowconfigure(0, weight=1)
@@ -79,9 +88,13 @@ class Deserializer(CTk.CTk):
         self.dest_binaries_table.heading("file", text=t("frontend.destination_file_loc"))
         self.dest_binaries_table.heading("result", text=t("frontend.result"))
         self.dest_binaries_table.heading("file_size", text=t("frontend.file_size"))
-        self.dest_binaries_table.pack(fill=CTk.BOTH, expand=True, padx=10, pady=10)
+        self.dest_binaries_frame.grid_rowconfigure(0, weight=1)
+        self.dest_binaries_frame.grid_columnconfigure(0, weight=1)
+        self.dest_binaries_frame.grid_propagate(False)
+        self.dest_binaries_table.grid(row=0, column=0, padx=10, pady=10, sticky=CTk.NSEW)
         self.dest_options_frame = ttk.LabelFrame(self.dest_files_frame,
                                                  text=t("frontend.destination_options"))
+        self.dest_options_frame.grid_propagate(False)
         self.dest_options_frame.grid(row=1, column=0, padx=10, pady=10, sticky=CTk.NSEW)
         self.bottom_menu = CTkMenuBar(self, bg_color=None)
         img = Image.open(get_resource_path("images/flatbuffers-batch-logo-clean.png"))
@@ -89,6 +102,23 @@ class Deserializer(CTk.CTk):
         self.deserialize_button.configure(text=t("frontend.deserialize"))
         self.deserialize_button.configure(command=self.deserialize_button_pressed)
         self.bottom_menu.pack(side=CTk.RIGHT)
+
+    @staticmethod
+    def attempt_apply_dnd(widget_id: int, dnd_event: Callable):
+        """
+        Adding files drag-and-drop functionality to widget if it's supported.
+        :param widget_id: Widget ID.
+        :param dnd_event: Callable object for drag-and-drop event.
+        """
+        if os.name != "nt":
+            return
+        try:
+            mod = import_module("pywinstyles")
+        except ModuleNotFoundError:
+            return
+        fun = getattr(mod, "apply_dnd", None)
+        if fun is not None:
+            fun(widget_id, dnd_event)
 
     @staticmethod
     def flatc_button_pressed():
@@ -118,6 +148,7 @@ class Deserializer(CTk.CTk):
         binary_path = os.path.abspath(file)
         if os.path.splitext(binary_path)[1].lower() == ".json":
             return
+        binary_exists = self.src_binaries_table.exists(binary_path.casefold())
         src_values = (binary_path, t("frontend.size_kb") % (os.path.getsize(binary_path) / 1024))
         output_path = os.path.splitext(binary_path)[0] + ".json"
         if os.path.isfile(output_path):
@@ -125,10 +156,18 @@ class Deserializer(CTk.CTk):
                            t("frontend.size_kb") % (os.path.getsize(output_path) / 1024))
         else:
             dest_values = (output_path, "", "")
-        if self.src_binaries_table.exists(binary_path.casefold()):
-            return
-        self.src_binaries_table.insert("", "end", binary_path.casefold(), values=src_values)
-        self.dest_binaries_table.insert("", "end", binary_path.casefold(), values=dest_values)
+        if binary_exists:
+            for j in range(2):
+                self.src_binaries_table.set(binary_path.casefold(), j, src_values[j])
+            self.src_binaries_table.update()
+            for j in range(3):
+                self.dest_binaries_table.set(binary_path.casefold(), j, dest_values[j])
+            self.dest_binaries_table.update()
+        else:
+            self.src_binaries_table.insert("", "end", binary_path.casefold(), values=src_values)
+            self.src_binaries_table.update()
+            self.dest_binaries_table.insert("", "end", binary_path.casefold(), values=dest_values)
+            self.dest_binaries_table.update()
 
     def on_schema_dropped(self, paths: list[str]):
         """
@@ -154,6 +193,7 @@ class Deserializer(CTk.CTk):
         if self.src_schemas_table.exists(schema_path.casefold()):
             return
         self.src_schemas_table.insert("", "end", schema_path.casefold(), values=[schema_path])
+        self.src_schemas_table.update()
 
     def deserialize_button_pressed(self):
         """
@@ -171,7 +211,7 @@ class Deserializer(CTk.CTk):
                         self.dest_binaries_table.get_children("")]
         schema_paths = [self.src_schemas_table.set(i, 0) for i in
                         self.src_schemas_table.get_children("")]
-        binary_tuples = get_binary_tuples(binary_paths, schema_paths)
+        binary_tuples = get_binary_tuples(binary_paths, schema_paths, True)
         for i, binary_tuple in enumerate(binary_tuples):
             self.deserialize_and_update_table(flatc_path, binary_tuple[1], binary_tuple[0],
                                               output_paths[i])
@@ -187,14 +227,19 @@ class Deserializer(CTk.CTk):
         """
         json_path = deserialize(flatc_path, schema_path, binary_path, output_path, False)
         for i in self.dest_binaries_table.get_children(""):
-            if os.path.samefile(i, binary_path):
-                if json_path != "":
-                    self.dest_binaries_table.set(i, 1, t("frontend.result_done"))
-                    self.dest_binaries_table.set(i, 2, t("frontend.size_kb") % (
-                                os.path.getsize(json_path) / 1024))
-                else:
-                    self.dest_binaries_table.set(i, 1, t("frontend.result_error"))
-                    self.dest_binaries_table.set(i, 2, "")
+            if not os.path.samefile(i, binary_path):
+                continue
+            if json_path != "":
+                self.dest_binaries_table.set(i, 1, t("frontend.result_done"))
+                self.dest_binaries_table.set(i, 2, t("frontend.size_kb") % (
+                        os.path.getsize(json_path) / 1024))
+            elif not os.path.isfile(schema_path):
+                self.dest_binaries_table.set(i, 1, t("frontend.schema_not_found"))
+                self.dest_binaries_table.set(i, 2, "")
+            else:
+                self.dest_binaries_table.set(i, 1, t("frontend.result_error"))
+                self.dest_binaries_table.set(i, 2, "")
+            self.dest_binaries_table.update()
 
 
 if __name__ == "__main__":
