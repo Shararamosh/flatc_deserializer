@@ -3,6 +3,7 @@
 """
 # pylint: disable=import-error, too-many-instance-attributes, too-many-statements
 import os
+import tkinter.filedialog
 from collections.abc import Callable
 from importlib import import_module
 from tkinter import ttk
@@ -60,10 +61,27 @@ class Deserializer(CTk.CTk):
         self.src_binaries_table.heading("file", text=t("frontend.source_file_loc"))
         self.src_binaries_table.heading("file_size", text=t("frontend.file_size"))
         self.src_binaries_frame.grid_rowconfigure(0, weight=1)
+        self.src_binaries_frame.grid_rowconfigure(1, weight=1)
         self.src_binaries_frame.grid_columnconfigure(0, weight=1)
+        self.src_binaries_frame.grid_columnconfigure(1, weight=1)
+        self.src_binaries_frame.grid_columnconfigure(2, weight=1)
         self.src_binaries_frame.grid_propagate(False)
-        self.src_binaries_table.grid(row=0, column=0, padx=10, pady=10, sticky=CTk.NSEW)
+        self.src_binaries_table.grid(row=0, column=0, columnspan=3, padx=10, pady=10,
+                                     sticky=CTk.NSEW)
         self.attempt_apply_dnd(self.src_binaries_table.winfo_id(), self.on_binary_dropped)
+        self.src_binaries_add_btn = CTk.CTkButton(self.src_binaries_frame,
+                                                  text=t("frontend.button_add"))
+        self.src_binaries_add_btn.configure(command=self.on_binary_add_click)
+        self.src_binaries_add_btn.grid(row=1, column=0, padx=10, pady=10, sticky=CTk.EW)
+        self.src_binaries_remove_selected_btn = CTk.CTkButton(self.src_binaries_frame, text=t(
+            "frontend.button_remove_selected"))
+        self.src_binaries_remove_selected_btn.grid(row=1, column=1, padx=10, pady=10, sticky=CTk.EW)
+        self.src_binaries_remove_selected_btn.configure(
+            command=self.on_binary_remove_selected_click)
+        self.src_binaries_remove_all = CTk.CTkButton(self.src_binaries_frame,
+                                                     text=t("frontend.button_remove_all"))
+        self.src_binaries_remove_all.grid(row=1, column=2, padx=10, pady=10, sticky=CTk.EW)
+        self.src_binaries_remove_all.configure(command=self.on_binary_remove_all_click)
         self.src_schemas_frame = ttk.LabelFrame(self.src_files_frame,
                                                 text=t("frontend.source_schemas"))
         self.src_schemas_frame.grid(row=1, column=0, padx=10, pady=10, sticky=CTk.NSEW)
@@ -84,14 +102,25 @@ class Deserializer(CTk.CTk):
         self.dest_binaries_frame.grid(row=0, column=0, padx=10, pady=10, sticky=CTk.NSEW)
         self.dest_binaries_table = ttk.Treeview(self.dest_binaries_frame,
                                                 columns=("file", "result", "file_size"),
-                                                show="headings")
+                                                show="headings", selectmode="browse")
         self.dest_binaries_table.heading("file", text=t("frontend.destination_file_loc"))
         self.dest_binaries_table.heading("result", text=t("frontend.result"))
         self.dest_binaries_table.heading("file_size", text=t("frontend.file_size"))
         self.dest_binaries_frame.grid_rowconfigure(0, weight=1)
+        self.dest_binaries_frame.grid_rowconfigure(1, weight=1)
         self.dest_binaries_frame.grid_columnconfigure(0, weight=1)
+        self.dest_binaries_frame.grid_columnconfigure(1, weight=1)
         self.dest_binaries_frame.grid_propagate(False)
-        self.dest_binaries_table.grid(row=0, column=0, padx=10, pady=10, sticky=CTk.NSEW)
+        self.dest_binaries_table.grid(row=0, column=0, columnspan=2, padx=10, pady=10,
+                                      sticky=CTk.NSEW)
+        self.attempt_apply_dnd(self.dest_binaries_table.winfo_id(), self.on_binary_dropped)
+        self.dest_binaries_change_dest_btn = CTk.CTkButton(self.dest_binaries_frame,
+                                                           text=t("frontend.button_change_dest"))
+        self.dest_binaries_change_dest_btn.grid(row=1, column=0, padx=10, pady=10, sticky=CTk.EW)
+        self.dest_binaries_change_dest_btn.configure(command=self.on_change_dest_click)
+        self.dest_binaries_rename_btn = CTk.CTkButton(self.dest_binaries_frame,
+                                                      text=t("frontend.button_rename_file"))
+        self.dest_binaries_rename_btn.grid(row=1, column=1, padx=10, pady=10, sticky=CTk.EW)
         self.dest_options_frame = ttk.LabelFrame(self.dest_files_frame,
                                                  text=t("frontend.destination_options"))
         self.dest_options_frame.grid_propagate(False)
@@ -126,6 +155,60 @@ class Deserializer(CTk.CTk):
         Triggered to download flatc.
         """
         execute_download(os.getcwd())
+
+    def on_binary_add_click(self):
+        """
+        Triggered when "Add..." button is clicked.
+        """
+        binary_paths = tkinter.filedialog.askopenfilenames(title=t("main.tkinter_binaries_select"))
+        if binary_paths is not None:
+            self.on_binary_dropped(binary_paths)
+
+    def on_binary_remove_selected_click(self):
+        """
+        Triggered when "Remove selected" button is clicked.
+        """
+        selected_items = self.src_binaries_table.selection()
+        for selected_item in selected_items:
+            self.src_binaries_table.delete(selected_item)
+            self.src_binaries_table.update()
+            self.dest_binaries_table.delete(selected_item)
+            self.dest_binaries_table.update()
+
+    def on_binary_remove_all_click(self):
+        """
+        Triggered when "Remove all" button is clicked.
+        :return:
+        """
+        for item in self.dest_binaries_table.get_children():
+            self.src_binaries_table.delete(item)
+            self.src_binaries_table.update()
+            self.dest_binaries_table.delete(item)
+            self.dest_binaries_table.update()
+
+    def on_change_dest_click(self):
+        """
+        Triggered when "Change destination directory..." button is clicked.
+        :return:
+        """
+        selected_items = self.dest_binaries_table.selection()
+        for selected_item in selected_items:
+            file_path = self.dest_binaries_table.set(selected_item, 0)
+            file_dir, file_name = os.path.split(file_path)
+            dest_dir = tkinter.filedialog.askdirectory(title=t("main.tkinter_output_select"),
+                                                       initialdir=file_dir)
+            if os.path.isdir(dest_dir):
+                new_file_path = os.path.abspath(os.path.join(dest_dir, file_name))
+                self.dest_binaries_table.set(selected_item, 0, new_file_path)
+                if os.path.isfile(new_file_path):
+                    self.dest_binaries_table.set(selected_item, 1,
+                                                 t("frontend.file_already_exists"))
+                    self.dest_binaries_table.set(selected_item, 2,
+                                                 t("frontend.size_kb") % (
+                                                             os.path.getsize(new_file_path) / 1024))
+                else:
+                    self.dest_binaries_table.set(selected_item, 1, "")
+                self.dest_binaries_table.update()
 
     def on_binary_dropped(self, paths: list[str]):
         """
@@ -233,6 +316,9 @@ class Deserializer(CTk.CTk):
                 self.dest_binaries_table.set(i, 1, t("frontend.result_done"))
                 self.dest_binaries_table.set(i, 2, t("frontend.size_kb") % (
                         os.path.getsize(json_path) / 1024))
+            elif not os.path.isfile(binary_path):
+                self.dest_binaries_table.set(i, 1, t("frontend.binary_not_found"))
+                self.dest_binaries_table.set(i, 2, "")
             elif not os.path.isfile(schema_path):
                 self.dest_binaries_table.set(i, 1, t("frontend.schema_not_found"))
                 self.dest_binaries_table.set(i, 2, "")

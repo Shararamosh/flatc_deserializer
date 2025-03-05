@@ -4,7 +4,7 @@ tkinter_fbs_select: Select schema file
 fbs_filetype: Flatbuffers schema
 tkinter_binaries_select: Select binary files
 flatc_binary_filetype: Binary Flatbuffers file
-tkinter_output_select: Select output directory
+tkinter_output_select: Select destination directory
 files: Files
 unsupported_platform: %s platform is not supported.
 executable_not_found: Executable %s not found.

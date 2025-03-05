@@ -19,4 +19,7 @@ flatc_not_found: Flatbuffers Schema Compiler (flatc) not found.
 error: Error
 result_done: Done
 result_error: Error
+result_binary_not_found: Binary not found
 schema_not_found: Schema not found
+button_change_dest: Change destination directory
+button_rename_file: Rename selected file

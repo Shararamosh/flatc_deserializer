@@ -28,7 +28,7 @@ def deserialize(flatc_path: str, schema_path: str, binary_path: str, output_path
     binary_path = os.path.abspath(binary_path)
     binary_name = os.path.splitext(os.path.basename(binary_path))[0]
     output_path = os.path.abspath(output_path)
-    json_path = os.path.abspath(output_path + os.sep + binary_name + ".json")
+    json_path = os.path.abspath(os.path.join(output_path, binary_name + ".json"))
     previous_json_contents = None
     try:
         with open(json_path, "rb") as json_file:
