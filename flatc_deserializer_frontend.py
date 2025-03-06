@@ -320,7 +320,7 @@ class Deserializer(CTk):
             file_path = self.dest_binaries_table.set(selected_item, 0)
             file_dir, file_name = os.path.split(file_path)
             new_file_path = tkinter.filedialog.asksaveasfilename(
-                title=t("main.tkinter_output_select"),
+                title=t("main.save_selected_file"),
                 defaultextension=".json",
                 initialdir=file_dir, initialfile=file_name,
                 filetypes=[(t("main.json_filetype"), "*.json")])

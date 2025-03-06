@@ -36,3 +36,4 @@ download_directory_arg: Directory for saving downloaded files
 no_files_selected: No files were selected.
 no_directory_selected: No directory was selected.
 no_file_selected: No file was selected.
+save_selected_file: Save selected file

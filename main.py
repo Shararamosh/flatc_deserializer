@@ -194,7 +194,8 @@ def get_schema_paths(root_path: str) -> list[str]:
     return schema_paths
 
 
-def get_binary_tuples(binary_paths: list[str], schema_paths: list[str], return_empty_pairs: bool = False) -> list[tuple[str, str]]:
+def get_binary_tuples(binary_paths: list[str], schema_paths: list[str],
+                      return_empty_pairs: bool = False) -> list[tuple[str, str]]:
     """
     Получение списка кортежей из двух элементов: (путь к бинарному файлу, путь к соответствующему ему файлу схемы)
     :param binary_paths: Список путей к бинарным файлам или директориям с ними.

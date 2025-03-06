@@ -20,4 +20,4 @@ result_done: Завершено
 result_error: Ошибка
 result_binary_not_found: Исходный файл не найден
 schema_not_found: Схема не найдена
-button_change_dest: Переименовать выбранный
+button_change_dest: Изменить назначение выбранного
