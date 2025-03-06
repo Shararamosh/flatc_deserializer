@@ -3,6 +3,7 @@
 """
 # pylint: disable=import-error
 import os
+import sys
 import tkinter.filedialog
 from collections.abc import Callable
 from importlib import import_module
@@ -27,7 +28,7 @@ def attempt_apply_dnd(widget_id: int, dnd_event: Callable):
     :param widget_id: Widget ID.
     :param dnd_event: Callable object for drag-and-drop event.
     """
-    if os.name != "nt":
+    if sys.platform != "win32":
         return
     try:
         mod = import_module("pywinstyles")
