@@ -127,7 +127,7 @@ class Deserializer(CTk):
         src_binaries_frame.grid(row=0, column=0, padx=10, pady=10, sticky=NSEW)
         self.src_binaries_table = ttk.Treeview(src_binaries_frame, columns=("file", "file_size"),
                                                show="headings")
-        self.src_binaries_table.heading("file", text=t("frontend.source_file_loc"))
+        self.src_binaries_table.heading("file", text=t("frontend.file_loc"))
         self.src_binaries_table.heading("file_size", text=t("frontend.file_size"))
         src_binaries_frame.grid_rowconfigure(0, weight=1)
         src_binaries_frame.grid_rowconfigure(1, weight=1)
@@ -206,24 +206,20 @@ class Deserializer(CTk):
         self.dest_binaries_table = ttk.Treeview(dest_binaries_frame,
                                                 columns=("file", "result", "file_size"),
                                                 show="headings", selectmode="browse")
-        self.dest_binaries_table.heading("file", text=t("frontend.destination_file_loc"))
+        self.dest_binaries_table.heading("file", text=t("frontend.file_loc"))
         self.dest_binaries_table.heading("result", text=t("frontend.result"))
         self.dest_binaries_table.heading("file_size", text=t("frontend.file_size"))
         dest_binaries_frame.grid_rowconfigure(0, weight=1)
         dest_binaries_frame.grid_rowconfigure(1, weight=1)
         dest_binaries_frame.grid_columnconfigure(0, weight=1)
-        dest_binaries_frame.grid_columnconfigure(1, weight=1)
         dest_binaries_frame.grid_propagate(False)
         self.dest_binaries_table.grid(row=0, column=0, columnspan=2, padx=10, pady=10,
                                       sticky=NSEW)
         attempt_apply_dnd(self.dest_binaries_table.winfo_id(), self.on_binary_dropped)
-        dest_binaries_change_dest_btn = CTkButton(dest_binaries_frame,
-                                                  text=t("frontend.button_change_dest"))
-        dest_binaries_change_dest_btn.grid(row=1, column=0, padx=10, pady=10, sticky=EW)
-        dest_binaries_change_dest_btn.configure(command=self.on_change_dest_click)
-        dest_binaries_rename_btn = CTkButton(dest_binaries_frame,
-                                             text=t("frontend.button_rename_file"))
-        dest_binaries_rename_btn.grid(row=1, column=1, padx=10, pady=10, sticky=EW)
+        dest_binaries_change_btn = CTkButton(dest_binaries_frame,
+                                             text=t("frontend.button_change_dest"))
+        dest_binaries_change_btn.grid(row=1, column=0, padx=10, pady=10, sticky=EW)
+        dest_binaries_change_btn.configure(command=self.on_change_dest_click)
         return dest_binaries_frame
 
     @staticmethod
@@ -323,10 +319,13 @@ class Deserializer(CTk):
         for selected_item in selected_items:
             file_path = self.dest_binaries_table.set(selected_item, 0)
             file_dir, file_name = os.path.split(file_path)
-            dest_dir = tkinter.filedialog.askdirectory(title=t("main.tkinter_output_select"),
-                                                       initialdir=file_dir)
-            if os.path.isdir(dest_dir):
-                new_file_path = os.path.abspath(os.path.join(dest_dir, file_name))
+            new_file_path = tkinter.filedialog.asksaveasfilename(
+                title=t("main.tkinter_output_select"),
+                defaultextension=".json",
+                initialdir=file_dir, initialfile=file_name,
+                filetypes=[(t("main.json_filetype"), "*.json")])
+            if new_file_path != "":
+                new_file_path = os.path.abspath(os.path.splitext(new_file_path)[0] + ".json")
                 self.dest_binaries_table.set(selected_item, 0, new_file_path)
                 if os.path.isfile(new_file_path):
                     self.dest_binaries_table.set(selected_item, 1,
@@ -336,6 +335,7 @@ class Deserializer(CTk):
                                                          os.path.getsize(new_file_path) / 1024))
                 else:
                     self.dest_binaries_table.set(selected_item, 1, "")
+                    self.dest_binaries_table.set(selected_item, 2, "")
                 self.dest_binaries_table.update()
 
     def on_binary_dropped(self, paths: list[str]):

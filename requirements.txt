@@ -3,7 +3,3 @@ tqdm
 i18nice[YAML]
 future
 argparse
-customtkinter
-CTkMenuBar
-pywinstyles
-CTkMessagebox

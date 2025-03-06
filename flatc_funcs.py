@@ -1,7 +1,9 @@
 """
     Модуль, включающий в себя функции для работы с Flatbuffers (flatc.exe).
 """
+# pylint: disable=too-many-branches
 import os
+import shutil
 from json import loads
 from logging import info
 from subprocess import run, CalledProcessError
@@ -16,7 +18,7 @@ def deserialize(flatc_path: str, schema_path: str, binary_path: str, output_path
     :param flatc_path: Путь к компилятору схемы.
     :param schema_path: Путь к файлу схемы.
     :param binary_path: Путь к бинарному файлу.
-    :param output_path: Путь к директории вывода.
+    :param output_path: Путь к директории или файлу вывода.
     :param return_dict: Если True, возвращать словарь из прочитанного файла. Иначе - путь к файлу.
     :return: Десериализованный бинарный файл в виде словаря.
     """
@@ -28,22 +30,28 @@ def deserialize(flatc_path: str, schema_path: str, binary_path: str, output_path
     binary_path = os.path.abspath(binary_path)
     binary_name = os.path.splitext(os.path.basename(binary_path))[0]
     output_path = os.path.abspath(output_path)
-    json_path = os.path.abspath(os.path.join(output_path, binary_name + ".json"))
-    previous_json_contents = None
-    try:
-        with open(json_path, "rb") as json_file:
-            previous_json_contents = json_file.read()
-    except OSError:
-        pass
-    args = [flatc_path]
     if output_path == "":
         output_path = os.path.dirname(binary_path)
+        json_path = os.path.join(output_path, binary_name + ".json")
+    elif os.path.splitext(output_path)[1].lower() == ".json":
+        output_path = os.path.dirname(output_path)
+        json_path = output_path
+    elif os.path.isfile(output_path):
+        return {} if return_dict else ""
+    else:
+        json_path = os.path.join(output_path, binary_name + ".json")
     output_path += os.sep
+    args = [flatc_path]
     args += ["--raw-binary"]
     args += ["-o", output_path]
     args += ["--strict-json"]
     args += ["-t", schema_path]
     args += ["--", binary_path]
+    output_json_path = os.path.join(output_path, binary_name + ".json")
+    previous_json_contents = None
+    if os.path.isfile(output_json_path):
+        with open(output_json_path, "rb") as file:
+            previous_json_contents = file.read()
     try:
         proc = run(args, shell=False, capture_output=True, text=True, check=True)
     except CalledProcessError as cpe:
@@ -54,9 +62,13 @@ def deserialize(flatc_path: str, schema_path: str, binary_path: str, output_path
     if proc.stdout is not None and proc.stdout != "":
         info(t("flatc_funcs.run_ok"), " ".join(args))
         info(proc.stdout)
-    if not os.path.isfile(json_path):
+    if not os.path.isfile(output_json_path):
         info(t("flatc_funcs.json_error"), binary_path)
         return {} if return_dict else ""
+    if previous_json_contents is not None and not os.path.samefile(output_json_path, json_path):
+        shutil.copy(output_json_path, json_path)
+        with open(output_json_path, "wb") as file:
+            file.write(previous_json_contents)
     try:
         with open(json_path, "rb") as json_file:
             current_json_contents = json_file.read()

@@ -2,6 +2,7 @@ tkinter_flatc_select: Select schema compiler
 exe_filetype: Windows Executable
 tkinter_fbs_select: Select schema file
 tkinter_fbs_multiple_select: Select schema files
+json_filetype: JSON
 fbs_filetype: Flatbuffers schema
 tkinter_binaries_select: Select binary files
 flatc_binary_filetype: Binary Flatbuffers file
