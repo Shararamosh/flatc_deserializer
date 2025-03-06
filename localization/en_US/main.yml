@@ -1,6 +1,7 @@
 tkinter_flatc_select: Select schema compiler
 exe_filetype: Windows Executable
 tkinter_fbs_select: Select schema file
+tkinter_fbs_multiple_select: Select schema files
 fbs_filetype: Flatbuffers schema
 tkinter_binaries_select: Select binary files
 flatc_binary_filetype: Binary Flatbuffers file
@@ -20,6 +21,7 @@ schemas_directory_arg: Directory with schema files
 binaries_directory_arg: Directory with binary files
 output_directory_arg: Output directory for deserialized files
 schema_file_arg: Schema file
+schema_files_arg: Schema files
 binary_files_arg: Binary files
 flatc_path_arg: Path to schema compiler (flatc)
 flatc_deserializer_name: Flatbuffers Deserializer

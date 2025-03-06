@@ -1,7 +1,7 @@
 """
     GUI app for deserializing flatbuffers files.
 """
-# pylint: disable=import-error, too-many-instance-attributes, too-many-statements
+# pylint: disable=import-error
 import os
 import tkinter.filedialog
 from collections.abc import Callable
@@ -11,7 +11,8 @@ from tkinter import ttk
 from PIL.ImageTk import PhotoImage
 from PIL import Image
 from i18n import t
-import customtkinter as CTk
+import customtkinter as ctk
+from customtkinter import CTk, CTkFrame, CTkButton, CTkImage, NSEW, EW, RIGHT
 from CTkMenuBar import CTkMenuBar
 from CTkMessagebox import CTkMessagebox
 
@@ -20,10 +21,30 @@ from main import init_localization, get_resource_path, execute_download, get_fla
 from flatc_funcs import deserialize
 
 
-class Deserializer(CTk.CTk):
+def attempt_apply_dnd(widget_id: int, dnd_event: Callable):
+    """
+    Adding files drag-and-drop functionality to widget if it's supported.
+    :param widget_id: Widget ID.
+    :param dnd_event: Callable object for drag-and-drop event.
+    """
+    if os.name != "nt":
+        return
+    try:
+        mod = import_module("pywinstyles")
+    except ModuleNotFoundError:
+        return
+    fun = getattr(mod, "apply_dnd", None)
+    if fun is not None:
+        fun(widget_id, dnd_event)
+
+
+class Deserializer(CTk):
     """
     GUI for batch deserialization of flatbuffers files.
     """
+    src_binaries_table: ttk.Treeview
+    src_schemas_table: ttk.Treeview
+    dest_binaries_table: ttk.Treeview
 
     def __init__(self):
         super().__init__()
@@ -34,120 +55,202 @@ class Deserializer(CTk.CTk):
         self.wm_iconbitmap()
         img = Image.open(get_resource_path("images/flatbuffers-logo-clean.png"))
         self.iconphoto(True, PhotoImage(img))
-        self.top_menu = CTkMenuBar(self, bg_color=None)
+        self._create_top_menu()
+        main_frame = self._create_main_frame()
+        files_frame = self._create_files_frame(main_frame)
+        src_files_frame = self._create_src_files_frame(files_frame)
+        self._create_src_binaries_frame(src_files_frame)
+        self._create_src_schemas_frame(src_files_frame)
+        dest_files_frame = self._create_dest_files_frame(files_frame)
+        self._create_dest_binaries_frame(dest_files_frame)
+        self._create_dest_files_options_frame(dest_files_frame)
+        self._create_bottom_menu()
+
+    def _create_top_menu(self) -> CTkMenuBar:
+        """
+        Creating top menu with "Download Schema Compiler" button.
+        :return: Created menu.
+        """
+        top_menu = CTkMenuBar(self, bg_color=None)
         img = Image.open(get_resource_path("images/flatbuffers-downloader-logo-clean.png"))
-        self.flatc_button = self.top_menu.add_cascade(image=CTk.CTkImage(img))
-        self.flatc_button.configure(text=t("frontend.download_flatc"))
-        self.flatc_button.configure(command=self.flatc_button_pressed)
-        self.main_frame = CTk.CTkFrame(self)
-        self.main_frame.pack(expand=True, fill="both")
-        self.main_frame.grid_rowconfigure(0, weight=1)
-        self.main_frame.grid_columnconfigure(0, weight=1)
-        self.files_frame = CTk.CTkFrame(self.main_frame)
-        self.files_frame.grid_rowconfigure(0, weight=1)
-        self.files_frame.grid_columnconfigure(0, weight=1)
-        self.files_frame.grid_columnconfigure(1, weight=1)
-        self.files_frame.grid(row=0, sticky=CTk.NSEW)
-        self.src_files_frame = ttk.LabelFrame(self.files_frame, text=t("frontend.source_files"))
-        self.src_files_frame.grid_rowconfigure(0, weight=1)
-        self.src_files_frame.grid_rowconfigure(1, weight=1)
-        self.src_files_frame.grid_columnconfigure(0, weight=1)
-        self.src_files_frame.grid(row=0, column=0, sticky=CTk.NSEW)
-        self.src_binaries_frame = ttk.LabelFrame(self.src_files_frame,
-                                                 text=t("frontend.source_binaries"))
-        self.src_binaries_frame.grid(row=0, column=0, padx=10, pady=10, sticky=CTk.NSEW)
-        self.src_binaries_table = ttk.Treeview(self.src_binaries_frame,
-                                               columns=("file", "file_size"), show="headings")
+        flatc_button = top_menu.add_cascade(image=CTkImage(img))
+        flatc_button.configure(text=t("frontend.download_flatc"))
+        flatc_button.configure(command=self.flatc_button_pressed)
+        return top_menu
+
+    def _create_main_frame(self) -> CTkFrame:
+        """
+        Creating main frame of app.
+        :return: Created frame.
+        """
+        main_frame = CTkFrame(self)
+        main_frame.pack(expand=True, fill="both")
+        main_frame.grid_rowconfigure(0, weight=1)
+        main_frame.grid_columnconfigure(0, weight=1)
+        return main_frame
+
+    @staticmethod
+    def _create_files_frame(main_frame: CTkFrame) -> CTkFrame:
+        """
+        Creating frame containing source and dest files.
+        :param main_frame: Main frame.
+        :return: Created frame.
+        """
+        files_frame = CTkFrame(main_frame)
+        files_frame.grid_rowconfigure(0, weight=1)
+        files_frame.grid_columnconfigure(0, weight=1)
+        files_frame.grid_columnconfigure(1, weight=1)
+        files_frame.grid(row=0, sticky=NSEW)
+        return files_frame
+
+    @staticmethod
+    def _create_src_files_frame(files_frame: CTkFrame) -> ttk.LabelFrame:
+        """
+        Creating frame containing source files.
+        :param files_frame: Files frame.
+        :return: Created frame.
+        """
+        src_files_frame = ttk.LabelFrame(files_frame, text=t("frontend.source_files"))
+        src_files_frame.grid_rowconfigure(0, weight=1)
+        src_files_frame.grid_rowconfigure(1, weight=1)
+        src_files_frame.grid_columnconfigure(0, weight=1)
+        src_files_frame.grid(row=0, column=0, sticky=NSEW)
+        return src_files_frame
+
+    def _create_src_binaries_frame(self, src_files_frame: ttk.LabelFrame) -> ttk.LabelFrame:
+        """
+        Creating frame containing source binaries.
+        :param src_files_frame: Source files frame.
+        :return: Created frame.
+        """
+        src_binaries_frame = ttk.LabelFrame(src_files_frame, text=t("frontend.source_binaries"))
+        src_binaries_frame.grid(row=0, column=0, padx=10, pady=10, sticky=NSEW)
+        self.src_binaries_table = ttk.Treeview(src_binaries_frame, columns=("file", "file_size"),
+                                               show="headings")
         self.src_binaries_table.heading("file", text=t("frontend.source_file_loc"))
         self.src_binaries_table.heading("file_size", text=t("frontend.file_size"))
-        self.src_binaries_frame.grid_rowconfigure(0, weight=1)
-        self.src_binaries_frame.grid_rowconfigure(1, weight=1)
-        self.src_binaries_frame.grid_columnconfigure(0, weight=1)
-        self.src_binaries_frame.grid_columnconfigure(1, weight=1)
-        self.src_binaries_frame.grid_columnconfigure(2, weight=1)
-        self.src_binaries_frame.grid_propagate(False)
-        self.src_binaries_table.grid(row=0, column=0, columnspan=3, padx=10, pady=10,
-                                     sticky=CTk.NSEW)
-        self.attempt_apply_dnd(self.src_binaries_table.winfo_id(), self.on_binary_dropped)
-        self.src_binaries_add_btn = CTk.CTkButton(self.src_binaries_frame,
-                                                  text=t("frontend.button_add"))
-        self.src_binaries_add_btn.configure(command=self.on_binary_add_click)
-        self.src_binaries_add_btn.grid(row=1, column=0, padx=10, pady=10, sticky=CTk.EW)
-        self.src_binaries_remove_selected_btn = CTk.CTkButton(self.src_binaries_frame, text=t(
-            "frontend.button_remove_selected"))
-        self.src_binaries_remove_selected_btn.grid(row=1, column=1, padx=10, pady=10, sticky=CTk.EW)
-        self.src_binaries_remove_selected_btn.configure(
-            command=self.on_binary_remove_selected_click)
-        self.src_binaries_remove_all = CTk.CTkButton(self.src_binaries_frame,
-                                                     text=t("frontend.button_remove_all"))
-        self.src_binaries_remove_all.grid(row=1, column=2, padx=10, pady=10, sticky=CTk.EW)
-        self.src_binaries_remove_all.configure(command=self.on_binary_remove_all_click)
-        self.src_schemas_frame = ttk.LabelFrame(self.src_files_frame,
-                                                text=t("frontend.source_schemas"))
-        self.src_schemas_frame.grid(row=1, column=0, padx=10, pady=10, sticky=CTk.NSEW)
-        self.src_schemas_table = ttk.Treeview(self.src_schemas_frame, columns="file", show="")
-        self.src_schemas_frame.grid_rowconfigure(0, weight=1)
-        self.src_schemas_frame.grid_columnconfigure(0, weight=1)
-        self.src_schemas_frame.grid_propagate(False)
-        self.src_schemas_table.grid(row=0, column=0, padx=10, pady=10, sticky=CTk.NSEW)
-        self.attempt_apply_dnd(self.src_schemas_table.winfo_id(), self.on_schema_dropped)
-        self.dest_files_frame = ttk.LabelFrame(self.files_frame,
-                                               text=t("frontend.destination_files"))
-        self.dest_files_frame.grid_rowconfigure(0, weight=1)
-        self.dest_files_frame.grid_rowconfigure(1, weight=1)
-        self.dest_files_frame.grid_columnconfigure(0, weight=1)
-        self.dest_files_frame.grid(row=0, column=1, sticky=CTk.NSEW)
-        self.dest_binaries_frame = ttk.LabelFrame(self.dest_files_frame,
-                                                  text=t("frontend.destination_binaries"))
-        self.dest_binaries_frame.grid(row=0, column=0, padx=10, pady=10, sticky=CTk.NSEW)
-        self.dest_binaries_table = ttk.Treeview(self.dest_binaries_frame,
+        src_binaries_frame.grid_rowconfigure(0, weight=1)
+        src_binaries_frame.grid_rowconfigure(1, weight=1)
+        src_binaries_frame.grid_columnconfigure(0, weight=1)
+        src_binaries_frame.grid_columnconfigure(1, weight=1)
+        src_binaries_frame.grid_columnconfigure(2, weight=1)
+        src_binaries_frame.grid_propagate(False)
+        self.src_binaries_table.grid(row=0, column=0, columnspan=3, padx=10, pady=10, sticky=NSEW)
+        attempt_apply_dnd(self.src_binaries_table.winfo_id(), self.on_binary_dropped)
+        src_binaries_add_btn = CTkButton(src_binaries_frame, text=t("frontend.button_add"))
+        src_binaries_add_btn.configure(command=self.on_binary_add_click)
+        src_binaries_add_btn.grid(row=1, column=0, padx=10, pady=10, sticky=EW)
+        src_binaries_remove_selected_btn = CTkButton(src_binaries_frame,
+                                                     text=t("frontend.button_remove_selected"))
+        src_binaries_remove_selected_btn.grid(row=1, column=1, padx=10, pady=10, sticky=EW)
+        src_binaries_remove_selected_btn.configure(command=self.on_binary_remove_selected_click)
+        src_binaries_remove_all_btn = CTkButton(src_binaries_frame,
+                                                text=t("frontend.button_remove_all"))
+        src_binaries_remove_all_btn.grid(row=1, column=2, padx=10, pady=10, sticky=EW)
+        src_binaries_remove_all_btn.configure(command=self.on_binary_remove_all_click)
+        return src_binaries_frame
+
+    def _create_src_schemas_frame(self, src_files_frame: ttk.LabelFrame) -> ttk.LabelFrame:
+        """
+        Creates frame containing source schemas.
+        :param src_files_frame: Source files frame.
+        :return: Created frame.
+        """
+        src_schemas_frame = ttk.LabelFrame(src_files_frame, text=t("frontend.source_schemas"))
+        src_schemas_frame.grid(row=1, column=0, padx=10, pady=10, sticky=NSEW)
+        self.src_schemas_table = ttk.Treeview(src_schemas_frame, columns="file", show="")
+        src_schemas_frame.grid_rowconfigure(0, weight=1)
+        src_schemas_frame.grid_rowconfigure(1, weight=1)
+        src_schemas_frame.grid_columnconfigure(0, weight=1)
+        src_schemas_frame.grid_columnconfigure(1, weight=1)
+        src_schemas_frame.grid_columnconfigure(2, weight=1)
+        src_schemas_frame.grid_propagate(False)
+        self.src_schemas_table.grid(row=0, column=0, columnspan=3, padx=10, pady=10, sticky=NSEW)
+        attempt_apply_dnd(self.src_schemas_table.winfo_id(), self.on_schema_dropped)
+        src_schemas_add_btn = CTkButton(src_schemas_frame, text=t("frontend.button_add"))
+        src_schemas_add_btn.configure(command=self.on_schema_add_click)
+        src_schemas_add_btn.grid(row=1, column=0, padx=10, pady=10, sticky=EW)
+        src_schemas_remove_selected_btn = CTkButton(src_schemas_frame,
+                                                    text=t("frontend.button_remove_selected"))
+        src_schemas_remove_selected_btn.grid(row=1, column=1, padx=10, pady=10, sticky=EW)
+        src_schemas_remove_selected_btn.configure(command=self.on_schema_remove_selected_click)
+        src_schemas_remove_all_btn = CTkButton(src_schemas_frame,
+                                               text=t("frontend.button_remove_all"))
+        src_schemas_remove_all_btn.grid(row=1, column=2, padx=10, pady=10, sticky=EW)
+        src_schemas_remove_all_btn.configure(command=self.on_schema_remove_all_click)
+        return src_schemas_frame
+
+    @staticmethod
+    def _create_dest_files_frame(files_frame: CTkFrame) -> ttk.LabelFrame:
+        """
+        Creates frame containing dest files.
+        :param files_frame: Files frame.
+        :return: Created frame.
+        """
+        dest_files_frame = ttk.LabelFrame(files_frame, text=t("frontend.destination_files"))
+        dest_files_frame.grid_rowconfigure(0, weight=1)
+        dest_files_frame.grid_rowconfigure(1, weight=1)
+        dest_files_frame.grid_columnconfigure(0, weight=1)
+        dest_files_frame.grid(row=0, column=1, sticky=NSEW)
+        return dest_files_frame
+
+    def _create_dest_binaries_frame(self, dest_files_frame: ttk.LabelFrame) -> ttk.LabelFrame:
+        """
+        Creates frame containing dest binaries.
+        :param dest_files_frame: Dest files frame.
+        :return: Created frame.
+        """
+        dest_binaries_frame = ttk.LabelFrame(dest_files_frame,
+                                             text=t("frontend.destination_binaries"))
+        dest_binaries_frame.grid(row=0, column=0, padx=10, pady=10, sticky=NSEW)
+        self.dest_binaries_table = ttk.Treeview(dest_binaries_frame,
                                                 columns=("file", "result", "file_size"),
                                                 show="headings", selectmode="browse")
         self.dest_binaries_table.heading("file", text=t("frontend.destination_file_loc"))
         self.dest_binaries_table.heading("result", text=t("frontend.result"))
         self.dest_binaries_table.heading("file_size", text=t("frontend.file_size"))
-        self.dest_binaries_frame.grid_rowconfigure(0, weight=1)
-        self.dest_binaries_frame.grid_rowconfigure(1, weight=1)
-        self.dest_binaries_frame.grid_columnconfigure(0, weight=1)
-        self.dest_binaries_frame.grid_columnconfigure(1, weight=1)
-        self.dest_binaries_frame.grid_propagate(False)
+        dest_binaries_frame.grid_rowconfigure(0, weight=1)
+        dest_binaries_frame.grid_rowconfigure(1, weight=1)
+        dest_binaries_frame.grid_columnconfigure(0, weight=1)
+        dest_binaries_frame.grid_columnconfigure(1, weight=1)
+        dest_binaries_frame.grid_propagate(False)
         self.dest_binaries_table.grid(row=0, column=0, columnspan=2, padx=10, pady=10,
-                                      sticky=CTk.NSEW)
-        self.attempt_apply_dnd(self.dest_binaries_table.winfo_id(), self.on_binary_dropped)
-        self.dest_binaries_change_dest_btn = CTk.CTkButton(self.dest_binaries_frame,
-                                                           text=t("frontend.button_change_dest"))
-        self.dest_binaries_change_dest_btn.grid(row=1, column=0, padx=10, pady=10, sticky=CTk.EW)
-        self.dest_binaries_change_dest_btn.configure(command=self.on_change_dest_click)
-        self.dest_binaries_rename_btn = CTk.CTkButton(self.dest_binaries_frame,
-                                                      text=t("frontend.button_rename_file"))
-        self.dest_binaries_rename_btn.grid(row=1, column=1, padx=10, pady=10, sticky=CTk.EW)
-        self.dest_options_frame = ttk.LabelFrame(self.dest_files_frame,
-                                                 text=t("frontend.destination_options"))
-        self.dest_options_frame.grid_propagate(False)
-        self.dest_options_frame.grid(row=1, column=0, padx=10, pady=10, sticky=CTk.NSEW)
-        self.bottom_menu = CTkMenuBar(self, bg_color=None)
-        img = Image.open(get_resource_path("images/flatbuffers-batch-logo-clean.png"))
-        self.deserialize_button = self.bottom_menu.add_cascade(image=CTk.CTkImage(img))
-        self.deserialize_button.configure(text=t("frontend.deserialize"))
-        self.deserialize_button.configure(command=self.deserialize_button_pressed)
-        self.bottom_menu.pack(side=CTk.RIGHT)
+                                      sticky=NSEW)
+        attempt_apply_dnd(self.dest_binaries_table.winfo_id(), self.on_binary_dropped)
+        dest_binaries_change_dest_btn = CTkButton(dest_binaries_frame,
+                                                  text=t("frontend.button_change_dest"))
+        dest_binaries_change_dest_btn.grid(row=1, column=0, padx=10, pady=10, sticky=EW)
+        dest_binaries_change_dest_btn.configure(command=self.on_change_dest_click)
+        dest_binaries_rename_btn = CTkButton(dest_binaries_frame,
+                                             text=t("frontend.button_rename_file"))
+        dest_binaries_rename_btn.grid(row=1, column=1, padx=10, pady=10, sticky=EW)
+        return dest_binaries_frame
 
     @staticmethod
-    def attempt_apply_dnd(widget_id: int, dnd_event: Callable):
+    def _create_dest_files_options_frame(dest_files_frame: ttk.LabelFrame) -> ttk.LabelFrame:
         """
-        Adding files drag-and-drop functionality to widget if it's supported.
-        :param widget_id: Widget ID.
-        :param dnd_event: Callable object for drag-and-drop event.
+        Creates options frame for dest binaries.
+        :param dest_files_frame: Dest files frame.
+        :return: Created frame.
         """
-        if os.name != "nt":
-            return
-        try:
-            mod = import_module("pywinstyles")
-        except ModuleNotFoundError:
-            return
-        fun = getattr(mod, "apply_dnd", None)
-        if fun is not None:
-            fun(widget_id, dnd_event)
+        dest_files_options_frame = ttk.LabelFrame(dest_files_frame,
+                                                  text=t("frontend.destination_options"))
+        dest_files_options_frame.grid_propagate(False)
+        dest_files_options_frame.grid(row=1, column=0, padx=10, pady=10, sticky=NSEW)
+        return dest_files_options_frame
+
+    def _create_bottom_menu(self) -> CTkMenuBar:
+        """
+        Creates bottom menu for app.
+        :return: Created menu.
+        """
+        bottom_menu = CTkMenuBar(self, bg_color=None)
+        img = Image.open(get_resource_path("images/flatbuffers-batch-logo-clean.png"))
+        deserialize_button = bottom_menu.add_cascade(image=CTkImage(img))
+        deserialize_button.configure(text=t("frontend.deserialize"))
+        deserialize_button.configure(command=self.deserialize_button_pressed)
+        bottom_menu.pack(side=RIGHT)
+        return bottom_menu
 
     @staticmethod
     def flatc_button_pressed():
@@ -178,18 +281,43 @@ class Deserializer(CTk.CTk):
     def on_binary_remove_all_click(self):
         """
         Triggered when "Remove all" button is clicked.
-        :return:
         """
-        for item in self.dest_binaries_table.get_children():
+        for item in self.src_binaries_table.get_children():
             self.src_binaries_table.delete(item)
             self.src_binaries_table.update()
             self.dest_binaries_table.delete(item)
             self.dest_binaries_table.update()
 
+    def on_schema_add_click(self):
+        """
+        Triggered when "Add..." button is clicked.
+        """
+        schema_paths = tkinter.filedialog.askopenfilenames(
+            title=t("main.tkinter_fbs_multiple_select"),
+            filetypes=[(t("main.fbs_filetype"), "*.fbs")])
+        if schema_paths is not None:
+            self.on_schema_dropped(schema_paths)
+
+    def on_schema_remove_selected_click(self):
+        """
+        Triggered when "Remove selected" button is clicked.
+        """
+        selected_items = self.src_schemas_table.selection()
+        for selected_item in selected_items:
+            self.src_schemas_table.delete(selected_item)
+            self.src_schemas_table.update()
+
+    def on_schema_remove_all_click(self):
+        """
+        Triggered when "Remove all" button is clicked.
+        """
+        for item in self.src_schemas_table.get_children():
+            self.src_schemas_table.delete(item)
+            self.src_schemas_table.update()
+
     def on_change_dest_click(self):
         """
         Triggered when "Change destination directory..." button is clicked.
-        :return:
         """
         selected_items = self.dest_binaries_table.selection()
         for selected_item in selected_items:
@@ -205,7 +333,7 @@ class Deserializer(CTk.CTk):
                                                  t("frontend.file_already_exists"))
                     self.dest_binaries_table.set(selected_item, 2,
                                                  t("frontend.size_kb") % (
-                                                             os.path.getsize(new_file_path) / 1024))
+                                                         os.path.getsize(new_file_path) / 1024))
                 else:
                     self.dest_binaries_table.set(selected_item, 1, "")
                 self.dest_binaries_table.update()
@@ -273,9 +401,10 @@ class Deserializer(CTk.CTk):
         schema_path = os.path.abspath(file)
         if os.path.splitext(schema_path)[1].lower() != ".fbs":
             return
-        if self.src_schemas_table.exists(schema_path.casefold()):
+        schema_name = os.path.splitext(os.path.basename(schema_path))[0]
+        if self.src_schemas_table.exists(schema_name.casefold()):
             return
-        self.src_schemas_table.insert("", "end", schema_path.casefold(), values=[schema_path])
+        self.src_schemas_table.insert("", "end", schema_name.casefold(), values=[schema_path])
         self.src_schemas_table.update()
 
     def deserialize_button_pressed(self):
@@ -296,11 +425,11 @@ class Deserializer(CTk.CTk):
                         self.src_schemas_table.get_children("")]
         binary_tuples = get_binary_tuples(binary_paths, schema_paths, True)
         for i, binary_tuple in enumerate(binary_tuples):
-            self.deserialize_and_update_table(flatc_path, binary_tuple[1], binary_tuple[0],
-                                              output_paths[i])
+            self._deserialize_and_update_table(flatc_path, binary_tuple[1], binary_tuple[0],
+                                               output_paths[i])
 
-    def deserialize_and_update_table(self, flatc_path: str, schema_path: str, binary_path: str,
-                                     output_path: str):
+    def _deserialize_and_update_table(self, flatc_path: str, schema_path: str, binary_path: str,
+                                      output_path: str):
         """
         Deserializes flatbuffers binary and updates destination table.
         :param flatc_path: Schema compiler path.
@@ -330,6 +459,6 @@ class Deserializer(CTk.CTk):
 
 if __name__ == "__main__":
     init_localization()
-    CTk.set_appearance_mode("System")
-    CTk.set_default_color_theme("blue")
+    ctk.set_appearance_mode("System")
+    ctk.set_default_color_theme("blue")
     Deserializer().mainloop()

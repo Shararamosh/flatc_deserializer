@@ -1,6 +1,7 @@
 tkinter_flatc_select: Выбор компилятора схемы
 exe_filetype: Приложение Windows
 tkinter_fbs_select: Выбор файла схемы
+tkinter_fbs_multiple_select: Выбор файлов схем
 fbs_filetype: Схема Flatbuffers
 tkinter_binaries_select: Выбор бинарных файлов
 flatc_binary_filetype: Бинарный файл Flatbuffers
@@ -20,6 +21,7 @@ schemas_directory_arg: Директория с файлами схем
 binaries_directory_arg: Директория с бинарными файлами
 output_directory_arg: Директория вывода для десериализованных файлов
 schema_file_arg: Файл схемы
+schema_files_arg: Файлы схем
 binary_files_arg: Бинарные файлы
 flatc_path_arg: Путь к компилятору схемы (flatc)
 flatc_deserializer_name: Flatbuffers Deserializer
