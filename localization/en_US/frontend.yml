@@ -1,0 +1,23 @@
+download_flatc: Download Schema Compiler
+source_files: Source files
+source_binaries: Source binary files
+source_schemas: Source schemas
+destination_files: Destination files
+destination_binaries: Destination JSON files
+deserialize: Deserialize
+destination_options: Destination file options
+button_add: Add...
+button_remove_selected: Remove selected
+button_remove_all: Remove all
+file_size: File size
+file_loc: File location
+result: Result
+size_kb: "%0.2f KBs"
+file_already_exists: File already exists
+flatc_not_found: Flatbuffers Schema Compiler (flatc) not found.
+error: Error
+result_done: Done
+result_error: Error
+result_binary_not_found: Source file not found
+schema_not_found: Schema not found
+button_change_dest: Rename selected

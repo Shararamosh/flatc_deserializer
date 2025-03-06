@@ -1,0 +1,23 @@
+download_flatc: Скачать компилятор схемы
+source_files: Исходные файлы
+source_binaries: Исходные бинарные файлы
+source_schemas: Исходные схемы
+destination_files: Файлы назначения
+destination_binaries: JSON-файлы назначения
+deserialize: Десериализовать
+destination_options: Опции файлов назначения
+button_add: Добавить...
+button_remove_selected: Удалить выбранные
+button_remove_all: Удалить все
+file_size: Размер файла
+file_loc: Расположение файла
+result: Результат
+size_kb: "%0.2f КБ"
+file_already_exists: Файл уже существует
+flatc_not_found: Компилятор схемы Flatbuffers (flatc) не найден.
+error: Ошибка
+result_done: Завершено
+result_error: Ошибка
+result_binary_not_found: Исходный файл не найден
+schema_not_found: Схема не найдена
+button_change_dest: Переименовать выбранный

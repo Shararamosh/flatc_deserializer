@@ -52,11 +52,29 @@ jobs:
             localization=localization
             images=images
           windows-icon-from-ico: images/flatbuffers-batch-logo-clean.png
+      - name: Install additional GUI requirements
+        run: |
+          pip install -r requirements_frontend.txt
+          pip install pywinstyles
+      - name: Run Nuitka for GUI
+        uses: Nuitka/Nuitka-Action@main
+        with:
+          nuitka-version: main
+          script-name: flatc_deserializer_frontend.py
+          mode: app
+          windows-console-mode: disable
+          enable-plugins: tk-inter
+          include-package: pywinstyles
+          include-data-dir: |
+            localization=localization
+            images=images
+          windows-icon-from-ico: images/flatbuffers-logo-clean.png
       - name: Move Executables from build to root directory
         run: |
           move build\flatc_deserializer.exe .
           move build\flatc_deserializer_batch.exe .
           move build\flatc_downloader.exe .
+          move build\flatc_deserializer_frontend.exe .
           rd /s /q build
         shell: cmd
       - name: Create Automatic Windows Release
@@ -70,3 +88,4 @@ jobs:
             flatc_deserializer.exe
             flatc_deserializer_batch.exe
             flatc_downloader.exe
+            flatc_deserializer_frontend.exe

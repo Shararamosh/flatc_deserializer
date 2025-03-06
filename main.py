@@ -194,35 +194,46 @@ def get_schema_paths(root_path: str) -> list[str]:
     return schema_paths
 
 
-def get_binary_tuples(binary_paths: list[str], schema_paths: list[str]) -> list[tuple[str, str]]:
+def get_binary_tuples(binary_paths: list[str], schema_paths: list[str], return_empty_pairs: bool = False) -> list[tuple[str, str]]:
     """
     Получение списка кортежей из двух элементов: (путь к бинарному файлу, путь к соответствующему ему файлу схемы)
     :param binary_paths: Список путей к бинарным файлам или директориям с ними.
     :param schema_paths: Список путей к файлам схем.
+    :param return_empty_pairs: True, если необходимо добавить в список файлы, к которым нет схем.
     :return: Кортеж из двух строковых элементов.
     """
     binary_tuples = []
     for _, binary_path in enumerate(binary_paths):
         if os.path.isfile(binary_path):
+            schema_found = False
             file_path = os.path.abspath(binary_path)
             for schema_path in schema_paths:
                 schema_ext = os.path.splitext(os.path.basename(schema_path))[0]
                 file_ext = os.path.splitext(file_path)[1][1:]
                 if schema_ext.casefold() == file_ext.casefold():
+                    schema_found = True
                     binary_tuples.append((file_path, schema_path))
                     break
+            if not schema_found and return_empty_pairs:
+                binary_tuples.append((file_path, ""))
             continue
         if not os.path.isdir(binary_path):
+            if return_empty_pairs:
+                binary_tuples.append((binary_path, ""))
             continue
         for subdir, _, files in os.walk(binary_path):
             for file in files:
+                schema_found = False
                 file_path = os.path.abspath(os.path.join(subdir, file))
                 for schema_path in schema_paths:
                     schema_ext = os.path.splitext(os.path.basename(schema_path))[0]
                     file_ext = os.path.splitext(file_path)[1][1:]
                     if schema_ext.casefold() == file_ext.casefold():
+                        schema_found = True
                         binary_tuples.append((file_path, schema_path))
                         break
+                if not schema_found and return_empty_pairs:
+                    binary_tuples.append((file_path, ""))
     return binary_tuples
 
 
