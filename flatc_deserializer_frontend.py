@@ -7,7 +7,7 @@ import sys
 import tkinter.filedialog
 from collections.abc import Callable
 from importlib import import_module
-from tkinter import ttk
+from tkinter import ttk, messagebox
 
 from PIL.ImageTk import PhotoImage
 from PIL import Image
@@ -15,7 +15,6 @@ from i18n import t
 import customtkinter as ctk
 from customtkinter import CTk, CTkFrame, CTkButton, CTkImage, NSEW, EW, RIGHT
 from CTkMenuBar import CTkMenuBar
-from CTkMessagebox import CTkMessagebox
 
 from main import init_localization, get_resource_path, execute_download, get_flatc_path, \
     get_binary_tuples
@@ -415,8 +414,7 @@ class Deserializer(CTk):
         """
         flatc_path = get_flatc_path(os.getcwd(), False, True)
         if flatc_path == "":
-            CTkMessagebox(title=t("frontend.error"), message=t("frontend.flatc_not_found"),
-                          icon="cancel")
+            messagebox.showerror(title=t("frontend.error"), message=t("frontend.flatc_not_found"))
             return
         binary_paths = [self.src_binaries_table.set(i, 0) for i in
                         self.src_binaries_table.get_children("")]
