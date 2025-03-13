@@ -8,10 +8,15 @@ import sys
 import argparse
 from i18n import t
 
-from main import init_app, get_flatc_path, execute_deserialize_batch
+from flatc_deserializer.general_funcs import init_app, get_flatc_path, execute_deserialize_batch
 
-if __name__ == "__main__":
-    init_app("images/flatbuffers-batch-logo-clean.png")
+
+def main() -> int | str:
+    """
+    Запуск скрипта.
+    :return: Код ошибки или строка об ошибке.
+    """
+    init_app(os.path.join("images", "flatbuffers-batch-logo-clean.png"))
     parser = argparse.ArgumentParser(prog=t("main.flatc_deserializer_batch_name"),
                                      description=t("main.flatc_deserializer_batch_desc"))
     parser.add_argument("-s", "--schemas_path", type=str, default="",
@@ -22,6 +27,10 @@ if __name__ == "__main__":
                         help=t("main.output_directory_arg"))
     parser.add_argument("-f", "--flatc_path", type=str, default="", help=t("main.flatc_path_arg"))
     args = parser.parse_args()
-    sys.exit(execute_deserialize_batch(
+    return execute_deserialize_batch(
         get_flatc_path(os.getcwd(), True, False) if args.flatc_path == "" else args.flatc_path,
-        args.schemas_path, args.binaries_path, args.output_path))
+        args.schemas_path, args.binaries_path, args.output_path)
+
+
+if __name__ == "__main__":
+    sys.exit(main())

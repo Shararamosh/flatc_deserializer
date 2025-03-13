@@ -22,17 +22,16 @@ jobs:
       - name: Run PyInstaller for Deserializer, Downloader and Batch Deserializer
         run: |
           set PYTHONOPTIMIZE=2
-          pyinstaller --onefile --name="flatc_deserializer" --console --icon=images\flatbuffers-logo-clean.png --add-data="images:images" --add-data="localization:localization" flatc_deserializer.py
-          pyinstaller --onefile --name="flatc_downloader" --console --icon=images\flatbuffers-downloader-logo-clean.png --add-data="images:images" --add-data="localization:localization" flatc_downloader.py
-          pyinstaller --onefile --name="flatc_deserializer_batch" --console --icon=images\flatbuffers-batch-logo-clean.png --add-data="images:images" --add-data="localization:localization" flatc_deserializer_batch.py
+          pyinstaller --onefile --name="flatc_deserializer" --console --icon=src\flatc_deserializer\images\flatbuffers-logo-clean.png --add-data="src\flatc_deserializer\images:images" --add-data="src\flatc_deserializer\localization:localization" deserializer.py
+          pyinstaller --onefile --name="flatc_downloader" --console --icon=src\flatc_deserializer\images\flatbuffers-downloader-logo-clean.png --add-data="src\flatc_deserializer\images:images" --add-data="src\flatc_deserializer\localization:localization" downloader.py
+          pyinstaller --onefile --name="flatc_deserializer_batch" --console --icon=src\flatc_deserializer\images\flatbuffers-batch-logo-clean.png --add-data="src\flatc_deserializer\images:images" --add-data="src\flatc_deserializer\localization:localization" deserializer_batch.py
       - name: Install additional GUI requirements
         run: |
-          pip install -r requirements_frontend.txt
           pip install pywinstyles
       - name: Run PyInstaller for GUI
         run: |
           set PYTHONOPTIMIZE=2
-          pyinstaller --onefile --noconsole --name="flatc_deserializer_frontend" --console --hiddenimport pywinstyles --icon=images\flatbuffers-logo-clean.png --add-data="images:images" --add-data="localization:localization" flatc_deserializer_frontend.py
+          pyinstaller --onefile --noconsole --name="flatc_deserializer_frontend" --hiddenimport pywinstyles --icon=src\flatc_deserializer\images\flatbuffers-logo-clean.png --add-data="src\flatc_deserializer\images:images" --add-data="src\flatc_deserializer\localization:localization" deserializer_frontend.py
       - name: Move Executables from dist to root directory and delete dist directory
         run: |
           move dist\flatc_deserializer.exe .

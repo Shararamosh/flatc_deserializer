@@ -4,10 +4,9 @@
 # pylint: disable=import-error
 import os
 import sys
-import tkinter.filedialog
 from collections.abc import Callable
 from importlib import import_module
-from tkinter import ttk, messagebox
+from tkinter import ttk, messagebox, filedialog
 
 from PIL.ImageTk import PhotoImage
 from PIL import Image
@@ -16,9 +15,9 @@ import customtkinter as ctk
 from customtkinter import CTk, CTkFrame, CTkButton, CTkImage, NSEW, EW, RIGHT
 from CTkMenuBar import CTkMenuBar
 
-from main import init_localization, get_resource_path, execute_download, get_flatc_path, \
-    get_binary_tuples
-from flatc_funcs import deserialize
+from flatc_deserializer.general_funcs import init_localization, get_resource_path, \
+    execute_download, get_flatc_path, get_binary_tuples
+from flatc_deserializer.flatc_funcs import deserialize
 
 
 def attempt_apply_dnd(widget_id: int, dnd_event: Callable):
@@ -53,7 +52,7 @@ class Deserializer(CTk):
         self.geometry(f"{width}x{height}")
         self.title(t("main.flatc_deserializer_name"))
         self.wm_iconbitmap()
-        img = Image.open(get_resource_path("images/flatbuffers-logo-clean.png"))
+        img = Image.open(get_resource_path(os.path.join("images", "flatbuffers-logo-clean.png")))
         self.iconphoto(True, PhotoImage(img))
         self._create_top_menu()
         main_frame = self._create_main_frame()
@@ -72,7 +71,8 @@ class Deserializer(CTk):
         :return: Created menu.
         """
         top_menu = CTkMenuBar(self, bg_color=None)
-        img = Image.open(get_resource_path("images/flatbuffers-downloader-logo-clean.png"))
+        img = Image.open(
+            get_resource_path(os.path.join("images", "flatbuffers-downloader-logo-clean.png")))
         flatc_button = top_menu.add_cascade(image=CTkImage(img))
         flatc_button.configure(text=t("frontend.download_flatc"))
         flatc_button.configure(command=self.flatc_button_pressed)
@@ -241,7 +241,8 @@ class Deserializer(CTk):
         :return: Created menu.
         """
         bottom_menu = CTkMenuBar(self, bg_color=None)
-        img = Image.open(get_resource_path("images/flatbuffers-batch-logo-clean.png"))
+        img = Image.open(
+            get_resource_path(os.path.join("images", "flatbuffers-batch-logo-clean.png")))
         deserialize_button = bottom_menu.add_cascade(image=CTkImage(img))
         deserialize_button.configure(text=t("frontend.deserialize"))
         deserialize_button.configure(command=self.deserialize_button_pressed)
@@ -259,7 +260,7 @@ class Deserializer(CTk):
         """
         Triggered when "Add..." button is clicked.
         """
-        binary_paths = tkinter.filedialog.askopenfilenames(title=t("main.tkinter_binaries_select"))
+        binary_paths = filedialog.askopenfilenames(title=t("main.tkinter_binaries_select"))
         if binary_paths is not None:
             self.on_binary_dropped(binary_paths)
 
@@ -288,7 +289,7 @@ class Deserializer(CTk):
         """
         Triggered when "Add..." button is clicked.
         """
-        schema_paths = tkinter.filedialog.askopenfilenames(
+        schema_paths = filedialog.askopenfilenames(
             title=t("main.tkinter_fbs_multiple_select"),
             filetypes=[(t("main.fbs_filetype"), "*.fbs")])
         if schema_paths is not None:
@@ -319,7 +320,7 @@ class Deserializer(CTk):
         for selected_item in selected_items:
             file_path = self.dest_binaries_table.set(selected_item, 0)
             file_dir, file_name = os.path.split(file_path)
-            new_file_path = tkinter.filedialog.asksaveasfilename(
+            new_file_path = filedialog.asksaveasfilename(
                 title=t("main.save_selected_file"),
                 defaultextension=".json",
                 initialdir=file_dir, initialfile=file_name,
@@ -456,8 +457,17 @@ class Deserializer(CTk):
             self.dest_binaries_table.update()
 
 
-if __name__ == "__main__":
+def main() -> str | int:
+    """
+    Launching script.
+    :return: Error code or string with error.
+    """
     init_localization()
     ctk.set_appearance_mode("System")
     ctk.set_default_color_theme("blue")
     Deserializer().mainloop()
+    return os.EX_OK
+
+
+if __name__ == "__main__":
+    sys.exit(main())

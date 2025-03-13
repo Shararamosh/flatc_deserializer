@@ -1,0 +1,2 @@
+graft src/flatc_deserializer/images
+graft src/flatc_deserializer/localization

@@ -1,13 +1,20 @@
+[build-system]
+requires = ["setuptools"]
+build-backend = "setuptools.build_meta"
 [project]
 name="flatc_deserializer"
 dynamic = ["version"]
+requires-python = ">= 3.11"
 dependencies = [
     "pillow",
     "tqdm",
-    "i18nice[YAML]"
+    "i18nice[YAML]",
+    "customtkinter",
+    "CTkMenuBar",
+    "pywinstyles; os_name == 'nt'"
 ]
 authors = [{name = "Shararamosh"}]
-description = "Program for deserialization of Flatbuffers binary files based on single or multiple schemas."
+description = "Console and GUI apps for deserialization of Flatbuffers binary files based on single or multiple schemas."
 keywords = [
     "json",
     "flatbuffers",
@@ -22,10 +29,20 @@ classifiers = [
     "Development Status :: 5 - Production/Stable",
     "Environment :: Console",
     "Intended Audience :: Developers",
+    "Intended Audience :: End Users/Desktop",
     "Natural Language :: English",
     "Natural Language :: Russian",
     "Operating System :: OS Independent",
-    "Programming Language :: Python",
+    "Programming Language :: Python :: 3.11",
     "Topic :: File Formats :: JSON",
     "Topic :: Utilities"
 ]
+readme = "README.MD"
+[project.urls]
+Repository = "https://github.com/Shararamosh/flatc_deserializer.git"
+[project.scripts]
+flatc_downloader = "flatc_deserializer.downloader:main"
+flatc_deserializer = "flatc_deserializer.deserializer:main"
+flatc_deserializer_batch = "flatc_deserializer.deserializer_batch:main"
+[project.gui-scripts]
+flatc_deserializer_frontend = "flatc_deserializer.deserializer_frontend:main"

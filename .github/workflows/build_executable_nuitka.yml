@@ -23,52 +23,52 @@ jobs:
         uses: Nuitka/Nuitka-Action@main
         with:
           nuitka-version: main
-          script-name: flatc_deserializer.py
+          script-name: src/flatc_deserializer/deserializer.py
+          output-file: flatc_deserializer
           mode: app
           enable-plugins: tk-inter
           include-data-dir: |
-            localization=localization
-            images=images
-          windows-icon-from-ico: images/flatbuffers-logo-clean.png
+            src/flatc_deserializer/localization=localization
+            src/flatc_deserializer/images=images
+          windows-icon-from-ico: src/flatc_deserializer/images/flatbuffers-logo-clean.png
       - name: Run Nuitka for Downloader
         uses: Nuitka/Nuitka-Action@main
         with:
           nuitka-version: main
-          script-name: flatc_downloader.py
+          script-name: src/flatc_deserializer/downloader.py
+          output-file: flatc_downloader
           mode: app
           enable-plugins: tk-inter
           include-data-dir: |
-            localization=localization
-            images=images
-          windows-icon-from-ico: images/flatbuffers-downloader-logo-clean.png
+            src/flatc_deserializer/localization=localization
+            src/flatc_deserializer/images=images
+          windows-icon-from-ico: src/flatc_deserializer/images/flatbuffers-downloader-logo-clean.png
       - name: Run Nuitka for Batch Deserializer
         uses: Nuitka/Nuitka-Action@main
         with:
           nuitka-version: main
-          script-name: flatc_deserializer_batch.py
+          script-name: src/flatc_deserializer/deserializer_batch.py
+          output-file: flatc_deserializer_batch
           mode: app
           enable-plugins: tk-inter
           include-data-dir: |
-            localization=localization
-            images=images
-          windows-icon-from-ico: images/flatbuffers-batch-logo-clean.png
-      - name: Install additional GUI requirements
-        run: |
-          pip install -r requirements_frontend.txt
-          pip install pywinstyles
+            src/flatc_deserializer/localization=localization
+            src/flatc_deserializer/images=images
+          windows-icon-from-ico: src/flatc_deserializer/images/flatbuffers-batch-logo-clean.png
       - name: Run Nuitka for GUI
         uses: Nuitka/Nuitka-Action@main
         with:
           nuitka-version: main
-          script-name: flatc_deserializer_frontend.py
+          script-name: src/flatc_deserializer/deserializer_frontend.py
+          output-file: flatc_deserializer_frontend
           mode: app
           windows-console-mode: disable
           enable-plugins: tk-inter
           include-package: pywinstyles
           include-data-dir: |
-            localization=localization
-            images=images
-          windows-icon-from-ico: images/flatbuffers-logo-clean.png
+            src/flatc_deserializer/localization=localization
+            src/flatc_deserializer/images=images
+          windows-icon-from-ico: src/flatc_deserializer/images/flatbuffers-logo-clean.png
       - name: Move Executables from build to root directory
         run: |
           move build\flatc_deserializer.exe .

@@ -7,13 +7,22 @@ import sys
 import argparse
 from i18n import t
 
-from main import init_app, execute_download
+from flatc_deserializer.general_funcs import init_app, execute_download
 
-if __name__ == "__main__":
-    init_app("images/flatbuffers-downloader-logo-clean.png")
+
+def main() -> int | str:
+    """
+    Запуск скрипта.
+    :return: Код ошибки или строка с ошибкой.
+    """
+    init_app(os.path.join("images", "flatbuffers-downloader-logo-clean.png"))
     parser = argparse.ArgumentParser(prog=t("main.flatc_downloader_name"),
                                      description=t("main.flatc_downloader_desc"))
     parser.add_argument("downloads_directory", nargs="?", type=str, default=os.getcwd(),
                         help=t("main.download_directory_arg"))
     args = parser.parse_args()
-    sys.exit(execute_download(args.downloads_directory))
+    return execute_download(args.downloads_directory)
+
+
+if __name__ == "__main__":
+    sys.exit(main())

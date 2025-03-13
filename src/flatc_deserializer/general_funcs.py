@@ -18,8 +18,8 @@ from PIL.ImageTk import PhotoImage
 from tqdm import tqdm
 from tqdm.contrib.logging import logging_redirect_tqdm
 
-from flatc_download_funcs import download_flatc
-from flatc_funcs import deserialize
+from flatc_deserializer.download_funcs import download_flatc
+from flatc_deserializer.flatc_funcs import deserialize
 
 
 def get_resource_path(file_path: str) -> str:
@@ -33,7 +33,7 @@ def get_resource_path(file_path: str) -> str:
     elif hasattr(sys, "_MEIPASS"):
         base_path = getattr(sys, "_MEIPASS")
     else:
-        base_path = os.path.abspath(".")
+        base_path = os.path.dirname(__file__)
     return os.path.join(base_path, file_path)
 
 

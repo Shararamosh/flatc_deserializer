@@ -11,7 +11,8 @@ Set of console tools and single combined GUI for the following:
 ### GUI only:
 - [customtkinter](https://pypi.org/project/customtkinter/)
 - [CTkMenuBar](https://pypi.org/project/CTkMenuBar/)
-- [CTkMessagebox](https://pypi.org/project/CTkMessagebox/)
+#### Optional (Windows only):
+- [pywinstyles](https://pypi.org/project/pywinstyles/) - adds drag-and-drop support.
 ## Latest Windows releases:
 - [PyInstaller](https://github.com/Shararamosh/flatc_deserializer/releases/tag/latest)
 - [Nuitka](https://github.com/Shararamosh/flatc_deserializer/releases/tag/latest-nuitka)
