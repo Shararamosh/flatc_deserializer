@@ -1,7 +1,7 @@
 """
     GUI app for deserializing flatbuffers files.
 """
-# pylint: disable=import-error
+# pylint: disable=import-error, wrong-import-position
 import os
 import sys
 from collections.abc import Callable
@@ -15,9 +15,11 @@ import customtkinter as ctk
 from customtkinter import CTk, CTkFrame, CTkButton, CTkImage, NSEW, EW, RIGHT
 from CTkMenuBar import CTkMenuBar
 
-from flatc_deserializer.general_funcs import init_localization, get_resource_path, \
-    execute_download, get_flatc_path, get_binary_tuples
-from flatc_deserializer.flatc_funcs import deserialize
+sys.path.append(os.path.join(os.path.dirname(__file__), "."))
+
+from general_funcs import init_localization, get_resource_path, execute_download, get_flatc_path, \
+    get_binary_tuples
+from flatc_funcs import deserialize
 
 
 def attempt_apply_dnd(widget_id: int, dnd_event: Callable):

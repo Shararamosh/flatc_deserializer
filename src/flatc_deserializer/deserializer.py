@@ -1,13 +1,15 @@
 """
     Десериализация выбранных бинарных файлов Flatbuffers по выбранной схеме.
 """
-# pylint: disable=import-error
+# pylint: disable=import-error, wrong-import-position
 import os
 import sys
 import argparse
 from i18n import t
 
-from flatc_deserializer.general_funcs import init_app, get_flatc_path, execute_deserialize
+sys.path.append(os.path.join(os.path.dirname(__file__), "."))
+
+from general_funcs import init_app, get_flatc_path, execute_deserialize
 
 
 def main() -> int | str:

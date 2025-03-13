@@ -1,13 +1,15 @@
 """
     Скачивание компилятора схемы Flatbuffers при его отсутствии в рабочей директории.
 """
-# pylint: disable=import-error
+# pylint: disable=import-error, wrong-import-position
 import os
 import sys
 import argparse
 from i18n import t
 
-from flatc_deserializer.general_funcs import init_app, execute_download
+sys.path.append(os.path.join(os.path.dirname(__file__), "."))
+
+from general_funcs import init_app, execute_download
 
 
 def main() -> int | str:

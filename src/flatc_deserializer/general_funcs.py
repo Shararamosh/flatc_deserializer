@@ -18,8 +18,8 @@ from PIL.ImageTk import PhotoImage
 from tqdm import tqdm
 from tqdm.contrib.logging import logging_redirect_tqdm
 
-from flatc_deserializer.download_funcs import download_flatc
-from flatc_deserializer.flatc_funcs import deserialize
+from download_funcs import download_flatc
+from flatc_funcs import deserialize
 
 
 def get_resource_path(file_path: str) -> str:
