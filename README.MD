@@ -11,6 +11,7 @@ Set of console tools and single combined GUI for the following:
 ### GUI only:
 - [customtkinter](https://pypi.org/project/customtkinter/)
 - [CTkMenuBar](https://pypi.org/project/CTkMenuBar/)
+- [CTkToolTip](https://pypi.org/project/CTkToolTip/)
 #### Optional (Windows only):
 - [pywinstyles](https://pypi.org/project/pywinstyles/) - adds drag-and-drop support.
 ## Latest Windows releases:
