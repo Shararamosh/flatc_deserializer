@@ -11,7 +11,8 @@ dependencies = [
     "i18nice[YAML]",
     "customtkinter",
     "CTkMenuBar",
-    "pywinstyles; os_name == 'nt'"
+    "pywinstyles; os_name == 'nt'",
+    "CTkToolTip"
 ]
 authors = [{name = "Shararamosh"}]
 description = "Console and GUI apps for deserialization of Flatbuffers binary files based on single or multiple schemas."

@@ -1,7 +1,7 @@
 """
     Модуль, включающий в себя функции для работы с Flatbuffers (flatc.exe).
 """
-# pylint: disable=too-many-branches
+# pylint: disable=too-many-branches, too-many-statements, too-many-arguments, too-many-locals
 import os
 import shutil
 from json import loads
@@ -12,16 +12,19 @@ from i18n import t
 
 
 def deserialize(flatc_path: str, schema_path: str, binary_path: str, output_path: str = "",
-                return_dict=True) -> dict:
+                additional_params=None, return_dict=True) -> dict:
     """
     Десериализация бинарного файла, используя схему Flatbuffers.
     :param flatc_path: Путь к компилятору схемы.
     :param schema_path: Путь к файлу схемы.
     :param binary_path: Путь к бинарному файлу.
     :param output_path: Путь к директории или файлу вывода.
+    :param additional_params: Дополнительный список параметров для компилятора схемы.
     :param return_dict: Если True, возвращать словарь из прочитанного файла. Иначе - путь к файлу.
     :return: Десериализованный бинарный файл в виде словаря.
     """
+    if additional_params is None:
+        additional_params = []
     if not os.path.isfile(flatc_path) or not os.path.isfile(schema_path) or not os.path.isfile(
             binary_path):
         return {} if return_dict else ""
@@ -44,7 +47,7 @@ def deserialize(flatc_path: str, schema_path: str, binary_path: str, output_path
     args = [flatc_path]
     args += ["--raw-binary"]
     args += ["-o", output_path]
-    args += ["--strict-json"]
+    args += additional_params
     args += ["-t", schema_path]
     args += ["--", binary_path]
     output_json_path = os.path.join(output_path, binary_name + ".json")

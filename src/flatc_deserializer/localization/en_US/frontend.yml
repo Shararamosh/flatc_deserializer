@@ -21,3 +21,7 @@ result_error: Error
 result_binary_not_found: Source file not found
 schema_not_found: Schema not found
 button_change_dest: Change selected destination
+strict_json: Require & generate strict JSON (field names are enclosed in quotes, no trailing commas in tables/vectors). By default, no quotes are required/generated, and trailing commas are allowed.
+allow_non_utf8: Pass non-UTF-8 input through parser and emit nonstandard \x escapes in JSON (default is to raise parse error on non-UTF-8 input).
+natural_utf8: Output strings with UTF-8 as human-readable strings. By default, UTF-8 characters are printed as \uXXXX escapes.
+defaults_json: Output fields whose value is equal to the default value when writing JSON text.

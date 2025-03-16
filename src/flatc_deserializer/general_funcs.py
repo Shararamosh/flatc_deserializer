@@ -166,7 +166,8 @@ str) -> (int | str):
         with ThreadPoolExecutor() as executor:
             future_deserialize_binaries = {
                 executor.submit(deserialize, flatc_path, schema_path, binary_path,
-                                output_path): binary_path for binary_path in binary_paths}
+                                output_path, ["--strict-json"]):
+                    binary_path for binary_path in binary_paths}
             for future in as_completed(future_deserialize_binaries):
                 binary_path = future_deserialize_binaries[future]
                 pbar.set_postfix_str(binary_path)
@@ -283,8 +284,9 @@ def execute_deserialize_batch(flatc_path: str, schemas_path: str, binaries_path:
             future_deserialize_binaries = {
                 executor.submit(deserialize, flatc_path, schema_path, binary_path,
                                 output_path + os.sep +
-                                os.path.split(os.path.relpath(binary_path, binaries_path))[
-                                    0]): binary_path for binary_path, schema_path in binary_tuples}
+                                os.path.split(os.path.relpath(binary_path, binaries_path))[0],
+                                ["--strict-json"]):
+                    binary_path for binary_path, schema_path in binary_tuples}
             for future in as_completed(future_deserialize_binaries):
                 binary_path = future_deserialize_binaries[future]
                 pbar.set_postfix_str(binary_path)

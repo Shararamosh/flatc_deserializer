@@ -6,14 +6,15 @@ import os
 import sys
 from collections.abc import Callable
 from importlib import import_module
-from tkinter import ttk, messagebox, filedialog
+from tkinter import ttk, messagebox, filedialog, BooleanVar
 
 from PIL.ImageTk import PhotoImage
 from PIL import Image
 from i18n import t
 import customtkinter as ctk
-from customtkinter import CTk, CTkFrame, CTkButton, CTkImage, NSEW, EW, RIGHT
+from customtkinter import CTk, CTkFrame, CTkButton, CTkImage, NSEW, EW, RIGHT, CTkCheckBox, NW
 from CTkMenuBar import CTkMenuBar
+from CTkToolTip import CTkToolTip
 
 sys.path.append(os.path.join(os.path.dirname(__file__), "."))
 
@@ -46,9 +47,17 @@ class Deserializer(CTk):
     src_binaries_table: ttk.Treeview
     src_schemas_table: ttk.Treeview
     dest_binaries_table: ttk.Treeview
+    strict_json: BooleanVar
+    allow_non_utf8: BooleanVar
+    natural_utf8: BooleanVar
+    defaults_json: BooleanVar
 
     def __init__(self):
         super().__init__()
+        self.strict_json = BooleanVar(self)
+        self.allow_non_utf8 = BooleanVar(self)
+        self.natural_utf8 = BooleanVar(self)
+        self.defaults_json = BooleanVar(self)
         width = int(self.winfo_screenwidth() / 2)
         height = int(self.winfo_screenheight() / 2)
         self.geometry(f"{width}x{height}")
@@ -224,8 +233,7 @@ class Deserializer(CTk):
         dest_binaries_change_btn.configure(command=self.on_change_dest_click)
         return dest_binaries_frame
 
-    @staticmethod
-    def _create_dest_files_options_frame(dest_files_frame: ttk.LabelFrame) -> ttk.LabelFrame:
+    def _create_dest_files_options_frame(self, dest_files_frame: ttk.LabelFrame) -> ttk.LabelFrame:
         """
         Creates options frame for dest binaries.
         :param dest_files_frame: Dest files frame.
@@ -235,6 +243,36 @@ class Deserializer(CTk):
                                                   text=t("frontend.destination_options"))
         dest_files_options_frame.grid_propagate(False)
         dest_files_options_frame.grid(row=1, column=0, padx=10, pady=10, sticky=NSEW)
+        dest_files_options_frame.grid_rowconfigure(0, weight=1)
+        dest_files_options_frame.grid_rowconfigure(1, weight=1)
+        dest_files_options_frame.grid_rowconfigure(2, weight=1)
+        dest_files_options_frame.grid_rowconfigure(3, weight=1)
+        dest_files_options_frame.grid_columnconfigure(0, weight=1)
+        strict_json_box = CTkCheckBox(dest_files_options_frame, text="--strict-json",
+                                      offvalue=False, onvalue=True)
+        strict_json_box.configure(variable=self.strict_json)
+        strict_json_box.select()
+        strict_json_box.grid(row=0, column=0, padx=10, pady=10, sticky=NW)
+        CTkToolTip(strict_json_box, message=t("frontend.strict_json"),
+                   wraplength=self.winfo_screenwidth() / 4)
+        allow_non_utf8 = CTkCheckBox(dest_files_options_frame, text="--allow-non-utf8",
+                                     offvalue=False, onvalue=True)
+        allow_non_utf8.configure(variable=self.allow_non_utf8)
+        allow_non_utf8.grid(row=1, column=0, padx=10, pady=10, sticky=NW)
+        CTkToolTip(allow_non_utf8, message=t("frontend.allow_non_utf8"),
+                   wraplength=self.winfo_screenwidth() / 4)
+        natural_utf8 = CTkCheckBox(dest_files_options_frame, text="--natural-utf8",
+                                   offvalue=False, onvalue=True)
+        natural_utf8.configure(variable=self.natural_utf8)
+        natural_utf8.grid(row=2, column=0, padx=10, pady=10, sticky=NW)
+        CTkToolTip(natural_utf8, message=t("frontend.natural_utf8"),
+                   wraplength=self.winfo_screenwidth() / 4)
+        defaults_json = CTkCheckBox(dest_files_options_frame, text="--defaults-json",
+                                    offvalue=False, onvalue=True)
+        defaults_json.configure(variable=self.defaults_json)
+        defaults_json.grid(row=3, column=0, padx=10, pady=10, sticky=NW)
+        CTkToolTip(defaults_json, message=t("frontend.defaults_json"),
+                   wraplength=self.winfo_screenwidth() / 4)
         return dest_files_options_frame
 
     def _create_bottom_menu(self) -> CTkMenuBar:
@@ -439,7 +477,16 @@ class Deserializer(CTk):
         :param binary_path: Binary file path.
         :param output_path: Output directory path.
         """
-        json_path = deserialize(flatc_path, schema_path, binary_path, output_path, False)
+        params = []
+        if self.strict_json.get():
+            params.append("--strict-json")
+        if self.allow_non_utf8.get():
+            params.append("--allow-non-utf8")
+        if self.natural_utf8.get():
+            params.append("--natural-utf8")
+        if self.defaults_json.get():
+            params.append("--defaults-json")
+        json_path = deserialize(flatc_path, schema_path, binary_path, output_path, params, False)
         for i in self.dest_binaries_table.get_children(""):
             if not os.path.samefile(i, binary_path):
                 continue

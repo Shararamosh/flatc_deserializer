@@ -4,3 +4,4 @@ i18nice[YAML]
 customtkinter
 CTkMenuBar
 pywinstyles; os_name == 'nt'
+CTkToolTip
